@@ -14,9 +14,9 @@ public class GridVisualizeEditor : Editor
         {
             colliderCreator.DebugGrid();
         }
-        if (GUILayout.Button("Cross clear test"))
+        if (GUILayout.Button("combo text test"))
         {
-            colliderCreator.GenerateCross();
+            colliderCreator.TestCombo();
         }
         // if (GUILayout.Button("Center camera to the grid"))
         // {
