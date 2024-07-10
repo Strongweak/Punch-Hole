@@ -15,6 +15,7 @@ public class MainMenuDataTransfer : MonoBehaviour
             Destroy(Instance);
         }
 
+        Application.targetFrameRate = 60;
         Instance = this;
     }
 }

@@ -93,6 +93,7 @@ public class Block : MonoBehaviour ,IPointerDownHandler, IPointerUpHandler,IDrag
         }
 
     }
+#if UNITY_EDITOR
     private void OnDrawGizmos()
     {
 
@@ -115,5 +116,6 @@ public class Block : MonoBehaviour ,IPointerDownHandler, IPointerUpHandler,IDrag
                 }
             }
         }
-    }
+    } 
+#endif
 }
