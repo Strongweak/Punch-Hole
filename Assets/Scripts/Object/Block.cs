@@ -18,7 +18,7 @@ public class Block : MonoBehaviour ,IPointerDownHandler, IPointerUpHandler,IDrag
     [SerializeField] private AudioClip pickSound;
     private const float skrink = 0.7f;
     private Vector3 originalScale;
-
+    [SerializeField] private Sprite defaultSprite;
     private void OnEnable()
     {
         if (_data != null)
@@ -53,23 +53,42 @@ public class Block : MonoBehaviour ,IPointerDownHandler, IPointerUpHandler,IDrag
             {
                 child.AddComponent<BoxCollider2D>();
             }
+
+            if (defaultSprite != null)
+            {
+                child.sprite = defaultSprite;
+            }
         }
     }
 #endif
 
-
+    private Vector2 offset;
     public void OnPointerDown(PointerEventData eventData)
     {
+        if (GameplayManager.Instance._state != GameState.PlayerTurn)
+        {
+            return;
+        }
         au.PlayOneShot(pickSound);
         Tween.Scale(transform,originalScale,0.2f,Ease.OutExpo);
         //Debug.Log("Hold");
+        Vector2 position = Camera.main.ScreenToWorldPoint(eventData.position);
+        offset = position - (Vector2)transform.position;
+        //Tween.Position(transform,position,0.2f,Ease.OutExpo);
     }
     
     //<TODO> check if can be placed , destroy the parent, release the child to the grid, if not return to the old position
     public void OnPointerUp(PointerEventData eventData)
     {
+        if (GameplayManager.Instance._state != GameState.PlayerTurn)
+        {
+            return;
+        }
         //Debug.Log("Release");
-        GameManager.instance.CheckAddToGrid(this);
+        //GameManager.instance.CheckAddToGrid(this);
+        GridSystem.Instance.CheckAddToGrid(this);
+        //ReturnOriginalSize();
+        GridSystem.Instance.ClearHighLight();
     }
 
     public void ReturnOriginalSize()
@@ -78,20 +97,27 @@ public class Block : MonoBehaviour ,IPointerDownHandler, IPointerUpHandler,IDrag
     }
     public void OnDrag(PointerEventData eventData)
     {
-        Vector2 newPosition;
-        RectTransformUtility.ScreenPointToLocalPointInRectangle(
-            transform.parent as RectTransform, 
-            eventData.position, 
-            eventData.pressEventCamera, 
-            out newPosition);
-        GameManager.instance.ClearHighLight();
-
-        transform.position = transform.parent.TransformPoint(newPosition);
+        if (GameplayManager.Instance._state != GameState.PlayerTurn)
+        {
+            return;
+        }
+        // Vector2 newPosition;
+        // RectTransformUtility.ScreenPointToLocalPointInRectangle(
+        //     transform.parent as RectTransform, 
+        //     eventData.position, 
+        //     eventData.pressEventCamera, 
+        //     out newPosition);
+        // //GameManager.instance.ClearHighLight();
+        // //GameplayManager.Instance.Check
+        // transform.position = transform.parent.TransformPoint(newPosition);
+        GridSystem.Instance.ClearHighLight();
+        Vector2 position = Camera.main.ScreenToWorldPoint(eventData.position);
+        transform.position = position - offset;
         foreach (var child in visual)
         {
-            GameManager.instance.HighLightCloset(child.transform);
+            //GameManager.instance.HighLightCloset(child.transform);
+            GridSystem.Instance.HighLightCloset(child.transform);
         }
-
     }
 #if UNITY_EDITOR
     private void OnDrawGizmos()
@@ -106,16 +132,16 @@ public class Block : MonoBehaviour ,IPointerDownHandler, IPointerUpHandler,IDrag
         GUIStyle style = new GUIStyle();
         style.normal.textColor = Color.red;
         style.fontSize = 30;
-        if (_data != null)
-        {
-            for (int i = 0; i < boardArray.GetLength(0); i++)
-            {
-                for (int j = 0; j < boardArray.GetLength(1); j++)
-                {
-                    Handles.Label(transform.position + new Vector3(i,j), Convert.ToInt32(boardArray[i,j]) + "", style);
-                }
-            }
-        }
+        // if (_data != null)
+        // {
+        //     for (int i = 0; i < boardArray.GetLength(0); i++)
+        //     {
+        //         for (int j = 0; j < boardArray.GetLength(1); j++)
+        //         {
+        //             Handles.Label(transform.position + new Vector3(i,j), Convert.ToInt32(boardArray[i,j]) + "", style);
+        //         }
+        //     }
+        // }
     } 
 #endif
 }
