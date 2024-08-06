@@ -42,10 +42,18 @@ public class GameplayManager : MonoBehaviour
 
     #region UI
 
+    [Header("Visual and block")]
     [SerializeField] private Transform shapeContainer;
     [SerializeField] private Transform positionTemplate;
     [SerializeField] private List<Transform> displayTransforms;
     [SerializeField] private List<Transform> worldSpaceTransforms;
+
+    [Space]
+    [Header("UI")]
+    [SerializeField] private RectTransform battleWonUI;
+    [SerializeField] private RectTransform winUI;
+    [SerializeField] private RectTransform loseUI;
+    [SerializeField] private RectTransform confirmUI;
     #endregion
 
     #region Game state
@@ -154,7 +162,10 @@ public class GameplayManager : MonoBehaviour
         Observer.Instance.TriggerEvent(ObserverConstant.OnStateChange, GameState.PlayerTurn);
         StartCoroutine(SpawnNewBlocks());
     }
-    
+
+    //<SUMMARY>
+    // Unfinished
+    //<SUMMARY>
     public void ModifySlot(int count)
     {
         if (count > 0)
@@ -191,6 +202,7 @@ public class GameplayManager : MonoBehaviour
             newUI.gameObject.SetActive(true);
             displayTransforms.Add(newUI);
             GameObject newWorldSpace = new GameObject();
+            newWorldSpace.name = "slot";
             worldSpaceTransforms.Add(newWorldSpace.transform);
         }
         yield return null;
@@ -217,6 +229,19 @@ public class GameplayManager : MonoBehaviour
             case GameState.EnemyTurn:
                 break;
         }
+    }
+
+    //Setup mandatory UI
+    private void SetupUI()
+    {
+        battleWonUI.gameObject.SetActive(false);
+        winUI.gameObject.SetActive(false);
+        loseUI.gameObject.SetActive(false);
+        confirmUI.gameObject.SetActive(false);
+    }
+    private void DisplayBattleWinUI()
+    {
+
     }
 }
 

@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5fc76b3998db05542a54c88a0124e74b, type: 3}
-  m_Name: Swap row
+  m_Name: Moth
   m_EditorClassIdentifier: 
-  name: Row Swap
-  description: Randomly swap 2 row
-  health: 30
-  delayAfterMove: 5
-  tier: 0
+  name: Moth
+  description: Move randomly on the board, destroy cell on the way
+  health: 40
+  delayAfterMove: 6
+  tier: 1
