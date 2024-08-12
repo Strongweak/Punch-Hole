@@ -54,12 +54,12 @@ public class GridSystem : MonoBehaviour
         gridContainer.AddComponent<SortingGroup>().sortingOrder = -2;
 
         highlightGridContainer = new GameObject();
-        highlightGridContainer.name = "Highlight grid";
+        highlightGridContainer.name = "highlight container";
         highlightGridContainer.AddComponent<SortingGroup>().sortingOrder = -1;
-
-        // dangerIndicatorGridContainer = new GameObject();
-        // dangerIndicatorGridContainer.name = "Danger grid";
-        // dangerIndicatorGridContainer.AddComponent<SortingGroup>().sortingOrder = 1;
+        
+        dangerIndicatorGridContainer = new GameObject();
+        dangerIndicatorGridContainer.name = "Danger container";
+        dangerIndicatorGridContainer.AddComponent<SortingGroup>().sortingOrder = 1;
         for (int i = 0; i < col; i++)
         {
             for (int j = 0; j < row; j++)
@@ -135,7 +135,12 @@ public class GridSystem : MonoBehaviour
 
         StartCoroutine(AdjustCameraToFitGrid());
     }
-
+    
+    public void ClearCell(int x, int y)
+    {
+        dataGrid[x, y].Item2 = 0;
+        Destroy(dataGrid[x, y].Item1);
+    }
     public void CheckAddToGrid(Block block)
     {
         // check if can be put on position
@@ -192,9 +197,8 @@ public class GridSystem : MonoBehaviour
             {
                 for (int j = 0; j < col; j++)
                 {
-                    dataGrid[j, i].Item2 = 0;
+                    ClearCell(j, i);
                     totalDamage += GameplayManager.Instance.plusScore + (GameplayManager.Instance.currentStreak * 10);
-                    Destroy(dataGrid[j, i].Item1);
                 }
 
                 lineClear++;
@@ -208,9 +212,8 @@ public class GridSystem : MonoBehaviour
             {
                 for (int j = 0; j < row; j++)
                 {
-                    dataGrid[i, j].Item2 = 0;
+                    ClearCell(i, j);
                     totalDamage += GameplayManager.Instance.plusScore + (GameplayManager.Instance.currentStreak * 10);
-                    Destroy(dataGrid[i, j].Item1);
                 }
 
                 lineClear++;
