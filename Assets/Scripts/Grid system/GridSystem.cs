@@ -19,52 +19,59 @@ public class GridSystem : MonoBehaviour
     public static int row = 8;
     public static int col = 8;
     public static SpriteRenderer[,] visualgrid;
-    public static (SpriteRenderer,MaterialPropertyBlock)[,] highlightGrid;
-    public static (GameObject,int)[,] dataGrid;
+    public static (SpriteRenderer, MaterialPropertyBlock)[,] highlightGrid;
+    public static (GameObject, int)[,] dataGrid;
     private GameObject gridContainer;
 
     private GameObject highlightGridContainer;
 
-    private GameObject dangerIndicatorGridContainer;
+    //private GameObject dangerIndicatorGridContainer;
     //need to rework this
     [SerializeField] private Color ghostColor;
     [SerializeField] private Color normalColor;
     [SerializeField] private Color gridColor;
+
     private void Awake()
     {
         Instance = this;
     }
-    
-    public void GenerateGrid()
+
+    public IEnumerator GenerateGrid()
     {
         if (gridContainer != null)
         {
             Destroy(gridContainer);
         }
+
         row = 9;
         col = 9;
         visualgrid = new SpriteRenderer[col, row];
-        highlightGrid = new (SpriteRenderer,MaterialPropertyBlock)[col, row];
-        dataGrid = new (GameObject, int)[col,row];
-        
+        highlightGrid = new (SpriteRenderer, MaterialPropertyBlock)[col, row];
+        dataGrid = new (GameObject, int)[col, row];
+
         gridContainer = new GameObject();
+        gridContainer.name = "Grid container";
         gridContainer.AddComponent<SortingGroup>().sortingOrder = -2;
-        
+
         highlightGridContainer = new GameObject();
+        highlightGridContainer.name = "Highlight grid";
         highlightGridContainer.AddComponent<SortingGroup>().sortingOrder = -1;
-        
-        dangerIndicatorGridContainer = new GameObject();
-        dangerIndicatorGridContainer.AddComponent<SortingGroup>().sortingOrder = 1;
+
+        // dangerIndicatorGridContainer = new GameObject();
+        // dangerIndicatorGridContainer.name = "Danger grid";
+        // dangerIndicatorGridContainer.AddComponent<SortingGroup>().sortingOrder = 1;
         for (int i = 0; i < col; i++)
         {
             for (int j = 0; j < row; j++)
             {
+                //grid
                 GameObject grid = Instantiate(cell);
                 grid.transform.parent = gridContainer.transform;
                 grid.transform.position = new Vector2(i, j);
                 grid.GetComponent<SpriteRenderer>().color = gridColor;
                 visualgrid[i, j] = grid.GetComponent<SpriteRenderer>();
 
+                //highlight
                 GameObject high = Instantiate(respondCell);
                 high.transform.parent = highlightGridContainer.transform;
                 high.transform.position = new Vector2(i, j);
@@ -74,16 +81,12 @@ public class GridSystem : MonoBehaviour
                 high.GetComponent<SpriteRenderer>().SetPropertyBlock(propertyBlock);
                 highlightGrid[i, j].Item1 = high.GetComponent<SpriteRenderer>();
                 highlightGrid[i, j].Item2 = propertyBlock;
-
-                // GameObject low = Instantiate(respondCell);
-                // low.transform.parent = dangerIndicatorGrid.transform;
-                // low.transform.position = new Vector2(i, j);
             }
         }
 
-        StartCoroutine(AdjustCameraToFitGrid());
+        yield return StartCoroutine(AdjustCameraToFitGrid());
     }
-    
+
     private IEnumerator AdjustCameraToFitGrid()
     {
         // Wait for the end of the frame to ensure all objects are fully initialized
@@ -94,6 +97,7 @@ public class GridSystem : MonoBehaviour
         {
             bounds.Encapsulate(col.GetComponent<Collider2D>().bounds);
         }
+
         bounds.Expand(cameraExpand);
 
         var vertical = bounds.size.y;
@@ -102,12 +106,14 @@ public class GridSystem : MonoBehaviour
         cam.orthographicSize = Mathf.Max(horizontal, vertical) * 0.5f;
         cam.transform.position = bounds.center + new Vector3(0, 0, -10) + (Vector3)offset;
     }
+
     public void GenerateGrid(int x, int y)
     {
         if (gridContainer != null)
         {
             Destroy(gridContainer);
         }
+
         row = y;
         col = x;
         visualgrid = new SpriteRenderer[col, row];
@@ -126,9 +132,10 @@ public class GridSystem : MonoBehaviour
                 visualgrid[i, j] = grid.GetComponent<SpriteRenderer>();
             }
         }
+
         StartCoroutine(AdjustCameraToFitGrid());
     }
-    
+
     public void CheckAddToGrid(Block block)
     {
         // check if can be put on position
@@ -167,9 +174,11 @@ public class GridSystem : MonoBehaviour
         //the flavor
         StartCoroutine(CheckLineAndRow());
     }
-    //
-    //<SUMMARY> check when block is put in which slot, start checking row and column of it
-    //
+
+    /// <summary>
+    /// check when block is put in which slot, start checking row and column of it
+    /// </summary>
+    /// <returns></returns>
     private IEnumerator CheckLineAndRow()
     {
         Observer.Instance.TriggerEvent(ObserverConstant.OnStateChange, GameState.Holdup);
@@ -179,7 +188,7 @@ public class GridSystem : MonoBehaviour
         //checking
         for (int i = row - 1; i >= 0; i--)
         {
-            if (HasLine(i,false))
+            if (HasLine(i, false))
             {
                 for (int j = 0; j < col; j++)
                 {
@@ -187,6 +196,7 @@ public class GridSystem : MonoBehaviour
                     totalDamage += GameplayManager.Instance.plusScore + (GameplayManager.Instance.currentStreak * 10);
                     Destroy(dataGrid[j, i].Item1);
                 }
+
                 lineClear++;
                 haveClear = true;
             }
@@ -194,7 +204,7 @@ public class GridSystem : MonoBehaviour
 
         for (int i = col - 1; i >= 0; i--)
         {
-            if (HasLine(i,true))
+            if (HasLine(i, true))
             {
                 for (int j = 0; j < row; j++)
                 {
@@ -202,6 +212,7 @@ public class GridSystem : MonoBehaviour
                     totalDamage += GameplayManager.Instance.plusScore + (GameplayManager.Instance.currentStreak * 10);
                     Destroy(dataGrid[i, j].Item1);
                 }
+
                 lineClear++;
                 haveClear = true;
             }
@@ -219,10 +230,11 @@ public class GridSystem : MonoBehaviour
         {
             yield return null;
         }
+
         Observer.Instance.TriggerEvent(ObserverConstant.OnPlayerMove);
         Observer.Instance.TriggerEvent(ObserverConstant.OnStateChange, GameState.PlayerTurn);
     }
-    
+
     public IEnumerator CheckLineAndRowAfterUpdate()
     {
         Observer.Instance.TriggerEvent(ObserverConstant.OnStateChange, GameState.Holdup);
@@ -232,7 +244,7 @@ public class GridSystem : MonoBehaviour
         //checking
         for (int i = row - 1; i >= 0; i--)
         {
-            if (HasLine(i,false))
+            if (HasLine(i, false))
             {
                 for (int j = 0; j < col; j++)
                 {
@@ -240,6 +252,7 @@ public class GridSystem : MonoBehaviour
                     totalDamage += GameplayManager.Instance.plusScore + (GameplayManager.Instance.currentStreak * 10);
                     Destroy(dataGrid[j, i].Item1);
                 }
+
                 lineClear++;
                 haveClear = true;
             }
@@ -247,7 +260,7 @@ public class GridSystem : MonoBehaviour
 
         for (int i = col - 1; i >= 0; i--)
         {
-            if (HasLine(i,true))
+            if (HasLine(i, true))
             {
                 for (int j = 0; j < row; j++)
                 {
@@ -255,6 +268,7 @@ public class GridSystem : MonoBehaviour
                     totalDamage += GameplayManager.Instance.plusScore + (GameplayManager.Instance.currentStreak * 10);
                     Destroy(dataGrid[i, j].Item1);
                 }
+
                 lineClear++;
                 haveClear = true;
             }
@@ -266,12 +280,14 @@ public class GridSystem : MonoBehaviour
             {
                 enemy.Damage(totalDamage);
             }
+
             yield return new WaitForSeconds(GameplayManager.Instance.gameplaySpeed);
         }
         else
         {
             yield return null;
         }
+
         Observer.Instance.TriggerEvent(ObserverConstant.OnStateChange, GameState.PlayerTurn);
     }
 
@@ -292,10 +308,13 @@ public class GridSystem : MonoBehaviour
             yield return new WaitForSeconds(0.05f);
         }
     }
-    
-    //
-    //<SUMMARY> check line render
-    //
+
+    /// <summary>
+    /// Check if found any line can be clear
+    /// </summary>
+    /// <param name="index"></param>
+    /// <param name="isColumn"></param>
+    /// <returns></returns>
     bool HasLine(int index, bool isColumn)
     {
         if (isColumn)
@@ -328,9 +347,12 @@ public class GridSystem : MonoBehaviour
         }
     }
 
-    //
-    //<SUMMARY> Store all clearable block to ready to delete
-    //
+    /// <summary>
+    /// Store all clearable block to ready to delete
+    /// </summary>
+    /// <param name="index"></param>
+    /// <param name="queue"></param>
+    /// <param name="isColumn"></param>
     void AddToQueue(int index, List<GameObject> queue, bool isColumn)
     {
         if (isColumn)
@@ -354,9 +376,13 @@ public class GridSystem : MonoBehaviour
             }
         }
     }
-    //
-    //<SUMMARY> check when block out of the board or not
-    //
+
+    /// <summary>
+    /// check when block out of the board or not
+    /// </summary>
+    /// <param name="x"></param>
+    /// <param name="y"></param>
+    /// <returns></returns>
     private bool InBounds(int x, int y)
     {
         if (x < 0 || x >= col)
@@ -371,6 +397,7 @@ public class GridSystem : MonoBehaviour
 
         return true;
     }
+
     //very duh
     public void ClearHighLight()
     {
@@ -380,6 +407,7 @@ public class GridSystem : MonoBehaviour
             crap.Item1.SetPropertyBlock(crap.Item2);
         }
     }
+
     public void HighLightCloset(Transform cube)
     {
         int roundedX = Mathf.RoundToInt(cube.position.x);
@@ -388,6 +416,7 @@ public class GridSystem : MonoBehaviour
         {
             return;
         }
+
         highlightGrid[roundedX, roundedY].Item2.SetColor("_Color", ghostColor);
         highlightGrid[roundedX, roundedY].Item1.SetPropertyBlock(highlightGrid[roundedX, roundedY].Item2);
     }
@@ -475,16 +504,17 @@ public class GridSystem : MonoBehaviour
         Debug.Log("OUT OF MOVE");
         GameplayManager.Instance.ShakeCamera(2f, 0.5f, 10f);
         yield return new WaitForSeconds(GameplayManager.Instance.gameplaySpeed * 2f);
-        
+
         for (int i = 0; i < col; i++)
         {
             for (int j = 0; j < row; j++)
             {
                 dataGrid[i, j].Item2 = 0;
                 Destroy(dataGrid[i, j].Item1);
-                yield return new WaitForSeconds(GameplayManager.Instance.gameplaySpeed/10f);
+                yield return new WaitForSeconds(GameplayManager.Instance.gameplaySpeed / 10f);
             }
         }
+
         Observer.Instance.TriggerEvent(ObserverConstant.OnStateChange, GameState.PlayerTurn);
     }
 #if UNITY_EDITOR
@@ -499,7 +529,7 @@ public class GridSystem : MonoBehaviour
             {
                 for (int j = 0; j < dataGrid.GetLength(1); j++)
                 {
-                    Handles.Label(new Vector3(i -0.5f,j + 0.5f), Convert.ToInt32(dataGrid[i,j].Item2) + "", style);
+                    Handles.Label(new Vector3(i - 0.5f, j + 0.5f), Convert.ToInt32(dataGrid[i, j].Item2) + "", style);
                 }
             }
         }

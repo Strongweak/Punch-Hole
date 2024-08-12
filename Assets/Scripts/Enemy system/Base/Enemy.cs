@@ -81,5 +81,16 @@ public class Enemy : MonoBehaviour, IDamageable
         }
         yield return new WaitForSeconds(GameplayManager.Instance.gameplaySpeed);
     }
-    
+    /// <summary>
+    /// Do highlight on chosen enemy to know which movement warning belong to
+    /// </summary>
+    public virtual void HeadupTelegraph()
+    {
+        
+    }
+    public virtual void ReleaseHeadupTelegraph()
+    {
+        
+    }
+
 }

@@ -191,8 +191,8 @@ Canvas:
   m_GameObject: {fileID: 209095267}
   m_Enabled: 1
   serializedVersion: 3
-  m_RenderMode: 0
-  m_Camera: {fileID: 0}
+  m_RenderMode: 1
+  m_Camera: {fileID: 1804610419}
   m_PlaneDistance: 100
   m_PixelPerfect: 0
   m_ReceivesEvents: 1
@@ -567,6 +567,7 @@ MonoBehaviour:
   currentStreak: 0
   plusScore: 1
   cam: {fileID: 1804610419}
+  mainCanvas: {fileID: 209095271}
   shapeContainer: {fileID: 560038562}
   positionTemplate: {fileID: 543504498}
   displayTransforms: []

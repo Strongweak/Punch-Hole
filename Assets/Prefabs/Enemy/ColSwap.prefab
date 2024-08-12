@@ -53,6 +53,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   enemyData: {fileID: 11400000, guid: 915d89b0da0dcda4f93d46c1c09d455f, type: 2}
+  maxHealth: 0
+  delayAfterMove: 0
+  currentHealth: 0
+  currentMoveCount: 0
+  isDead: 0
   healthbarShader: {fileID: 182556286523163647}
   enemyVisual: {fileID: 156618961037213900}
   informationBox: {fileID: 6727191887811381308}
@@ -60,6 +65,7 @@ MonoBehaviour:
   numberText: {fileID: 6368295539800355326}
   firstCol: 0
   secCol: 0
+  warningMaterial: {fileID: 2100000, guid: 6f3b7a87dc7bd1842b59c07d9def0448, type: 2}
 --- !u!1 &2253972977264282361
 GameObject:
   m_ObjectHideFlags: 0
@@ -285,6 +291,7 @@ MonoBehaviour:
   originalScale: {x: 0, y: 0, z: 0}
   shrink: 0.9
   enemyParent: {fileID: 0}
+  _image: {fileID: 0}
   informationBox: {fileID: 6727191887811381308}
 --- !u!1 &2659711770490992519
 GameObject:

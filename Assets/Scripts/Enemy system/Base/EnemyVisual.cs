@@ -19,6 +19,7 @@ public class EnemyVisual : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
     {
         _rectTransform = GetComponent<RectTransform>();
         _image = GetComponent<Image>();
+        enemyParent = transform.parent.GetComponent<Enemy>();
     }
 
     private void OnEnable()
@@ -32,6 +33,7 @@ public class EnemyVisual : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
     {
         informationBox.SetActive(true);
         Tween.Scale(transform,originalScale,0.2f,Ease.OutExpo);
+        enemyParent.HeadupTelegraph();
     }
 
     public void OnPointerUp(PointerEventData eventData)
@@ -40,6 +42,7 @@ public class EnemyVisual : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
         //_rectTransform.anchoredPosition = Vector2.zero;
         Tween.UIAnchoredPosition(_rectTransform,Vector2.zero, 1f, Ease.OutElastic);
         Tween.Scale(transform,originalScale * shrink,0.2f,Ease.OutExpo);
+        enemyParent.ReleaseHeadupTelegraph();
     }
 
     public void OnDrag(PointerEventData eventData)
