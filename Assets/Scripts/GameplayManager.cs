@@ -12,7 +12,8 @@ public class GameplayManager : MonoBehaviour
 
     #region Player stat
 
-    [Header("Player stat")] [SerializeField]
+    [Header("Player stat")]
+    [SerializeField]
     private int maxLife;
 
     [SerializeField] private ShapeListSO spawnableBlock;
@@ -24,7 +25,7 @@ public class GameplayManager : MonoBehaviour
 
     #region Enemy stat
 
-    [Header("Enemy")] [SerializeField] private int maxNumberOfEnemies = 3;
+    [Header("Enemy")][SerializeField] private int maxNumberOfEnemies = 3;
     public List<Enemy> currentEnemies;
     [SerializeField] private Transform enemyContainer;
     [SerializeField] private List<Enemy> enemyprefab;
@@ -33,7 +34,7 @@ public class GameplayManager : MonoBehaviour
 
     #region Scoring
 
-    [Header("Score")] [SerializeField] private ScoringSO comboScore;
+    [Header("Score")][SerializeField] private ScoringSO comboScore;
     private int currentScore;
     [SerializeField] private int beforeStartStreak = 3;
     [SerializeField] private int currentChain = 0;
@@ -96,6 +97,10 @@ public class GameplayManager : MonoBehaviour
         Tween.ShakeCamera(cam, strength, duration, frequency);
     }
 
+    /// <summary>
+    /// Spawn new block, and make player have to wait until it spawn
+    /// </summary>
+    /// <returns></returns>
     public IEnumerator SpawnNewBlocks()
     {
         Observer.Instance.TriggerEvent(ObserverConstant.OnStateChange, GameState.Holdup);
@@ -116,7 +121,11 @@ public class GameplayManager : MonoBehaviour
         Observer.Instance.TriggerEvent(ObserverConstant.OnStateChange, GameState.PlayerTurn);
         GridSystem.Instance.CheckOutOfMove();
     }
-
+    /// <summary>
+    /// Spawnning enemy
+    /// </summary>
+    /// <param name="count"></param>
+    /// <returns></returns>
     private IEnumerator SpawnEnemy(int count)
     {
         currentEnemies = new List<Enemy>();
@@ -129,6 +138,10 @@ public class GameplayManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Manage the movement of enemies, enemies will taking turn one after another
+    /// </summary>
+    /// <returns></returns>
     private IEnumerator CheckCurrentEnemy()
     {
         List<Enemy> enemiesToRemove = new List<Enemy>();
@@ -255,7 +268,9 @@ public class GameplayManager : MonoBehaviour
         }
     }
 
-    //Setup mandatory UI
+    /// <summary>
+    /// Setup first time playing UI
+    /// </summary>
     private void SetupUI()
     {
         battleWonUI.gameObject.SetActive(false);
