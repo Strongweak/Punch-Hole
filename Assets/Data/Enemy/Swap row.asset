@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5fc76b3998db05542a54c88a0124e74b, type: 3}
-  m_Name: Swap row 1
+  m_Name: Swap row
   m_EditorClassIdentifier: 
   name: Row Swap
   description: Randomly swap 2 row

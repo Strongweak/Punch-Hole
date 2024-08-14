@@ -52,7 +52,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8dd9b2d17efd6a444b4cfa3b2eaa5ebe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  enemyData: {fileID: 11400000, guid: fcd148e37b8182448809f0bfb0bf9b45, type: 2}
+  enemyData: {fileID: 11400000, guid: 079b327743df0e64fb14590dcf9dc1f1, type: 2}
   maxHealth: 0
   delayAfterMove: 0
   currentHealth: 0
