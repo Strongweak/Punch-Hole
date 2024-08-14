@@ -148,4 +148,10 @@ public class ColSwapper : Enemy
         secondWarning.GetComponent<MeshRenderer>().SetPropertyBlock(matBlock);
         firstWarning.GetComponent<MeshRenderer>().SetPropertyBlock(matBlock);
     }
+
+    public override void OnDestroy()
+    {
+        Destroy(firstWarning);
+        Destroy(secondWarning);
+    }
 }

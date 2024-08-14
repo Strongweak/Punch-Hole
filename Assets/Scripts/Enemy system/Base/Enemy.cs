@@ -93,4 +93,8 @@ public class Enemy : MonoBehaviour, IDamageable
         
     }
 
+    public virtual void OnDestroy()
+    {
+        
+    }
 }

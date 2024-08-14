@@ -57,9 +57,6 @@ public class GridSystem : MonoBehaviour
         highlightGridContainer.name = "highlight container";
         highlightGridContainer.AddComponent<SortingGroup>().sortingOrder = -1;
         
-        dangerIndicatorGridContainer = new GameObject();
-        dangerIndicatorGridContainer.name = "Danger container";
-        dangerIndicatorGridContainer.AddComponent<SortingGroup>().sortingOrder = 1;
         for (int i = 0; i < col; i++)
         {
             for (int j = 0; j < row; j++)
