@@ -6,12 +6,12 @@ using UnityEngine.Serialization;
 
 public class HorizontalEnemy : Enemy
 {
-    [SerializeField] private int firstrow;
-    [SerializeField] private int secRow;
-    private GameObject firstWarning;
-    private GameObject secondWarning;
+    [SerializeField] private int _firstrow;
+    [SerializeField] private int _secRow;
+    private GameObject _firstWarning;
+    private GameObject _secondWarning;
     [SerializeField] private Material warningMaterial;
-    private MaterialPropertyBlock matBlock;
+    private MaterialPropertyBlock _matBlock;
     protected override void Start()
     {
         CreateWarningMesh();
@@ -25,38 +25,38 @@ public class HorizontalEnemy : Enemy
              true, Ease.OutElastic);
         Sequence shithead = Sequence.Create(cycles: 1, CycleMode.Yoyo);
         Observer.Instance.TriggerEvent(ObserverConstant.OnStateChange, GameState.EnemyTurn);
-        for (int i = 0; i < GridSystem.col; i++)
+        for (int i = 0; i < GridSystem.Col; i++)
         {
             GameObject tempObject;
             int tempValue;
-            tempObject = GridSystem.dataGrid[i, firstrow].Item1;
-            tempValue = GridSystem.dataGrid[i, firstrow].Item2;
+            tempObject = GridSystem.DataGrid[i, _firstrow].Item1;
+            tempValue = GridSystem.DataGrid[i, _firstrow].Item2;
             Sequence firstColTween = new Sequence();
             Sequence secondTween = new Sequence();
 
             // Tween for the first row
-            if (GridSystem.dataGrid[i, firstrow].Item1 != null)
+            if (GridSystem.DataGrid[i, _firstrow].Item1 != null)
             {
-                firstColTween = Tween.Scale(GridSystem.dataGrid[i, firstrow].Item1.transform, Vector3.one * 1.2f,
+                firstColTween = Tween.Scale(GridSystem.DataGrid[i, _firstrow].Item1.transform, Vector3.one * 1.2f,
                         GameplayManager.Instance.gameplaySpeed)
-                    .Chain(Tween.Position(GridSystem.dataGrid[i, firstrow].Item1.transform, new Vector3(i, secRow),
+                    .Chain(Tween.Position(GridSystem.DataGrid[i, _firstrow].Item1.transform, new Vector3(i, _secRow),
                         GameplayManager.Instance.gameplaySpeed, Ease.OutExpo))
                     .ChainDelay(GameplayManager.Instance.gameplaySpeed)
-                    .Chain(Tween.Scale(GridSystem.dataGrid[i, firstrow].Item1.transform, Vector3.one,
+                    .Chain(Tween.Scale(GridSystem.DataGrid[i, _firstrow].Item1.transform, Vector3.one,
                         GameplayManager.Instance.gameplaySpeed))
                     .ChainDelay(GameplayManager.Instance.gameplaySpeed);
 
             }
 
             // Tween for the second row
-            if (GridSystem.dataGrid[i, secRow].Item1 != null)
+            if (GridSystem.DataGrid[i, _secRow].Item1 != null)
             {
-                secondTween = Tween.Scale(GridSystem.dataGrid[i, secRow].Item1.transform, Vector3.one * 1.2f,
+                secondTween = Tween.Scale(GridSystem.DataGrid[i, _secRow].Item1.transform, Vector3.one * 1.2f,
                         GameplayManager.Instance.gameplaySpeed)
-                    .Chain(Tween.Position(GridSystem.dataGrid[i, secRow].Item1.transform, new Vector3(i, firstrow),
+                    .Chain(Tween.Position(GridSystem.DataGrid[i, _secRow].Item1.transform, new Vector3(i, _firstrow),
                         GameplayManager.Instance.gameplaySpeed, Ease.OutExpo))
                     .ChainDelay(GameplayManager.Instance.gameplaySpeed)
-                    .Chain(Tween.Scale(GridSystem.dataGrid[i, secRow].Item1.transform, Vector3.one,
+                    .Chain(Tween.Scale(GridSystem.DataGrid[i, _secRow].Item1.transform, Vector3.one,
                         GameplayManager.Instance.gameplaySpeed))
                     .ChainDelay(GameplayManager.Instance.gameplaySpeed);
             }
@@ -66,10 +66,10 @@ public class HorizontalEnemy : Enemy
             shithead.Group(firstColTween).Group(secondTween);
             //yield return currentSequence.ToYieldInstruction();
             // then the data
-            GridSystem.dataGrid[i, firstrow].Item1 = GridSystem.dataGrid[i, secRow].Item1;
-            GridSystem.dataGrid[i, firstrow].Item2 = GridSystem.dataGrid[i, secRow].Item2;
-            GridSystem.dataGrid[i, secRow].Item1 = tempObject;
-            GridSystem.dataGrid[i, secRow].Item2 = tempValue;
+            GridSystem.DataGrid[i, _firstrow].Item1 = GridSystem.DataGrid[i, _secRow].Item1;
+            GridSystem.DataGrid[i, _firstrow].Item2 = GridSystem.DataGrid[i, _secRow].Item2;
+            GridSystem.DataGrid[i, _secRow].Item1 = tempObject;
+            GridSystem.DataGrid[i, _secRow].Item2 = tempValue;
         }
         yield return shithead.ToYieldInstruction();
         Telegraph();
@@ -78,22 +78,22 @@ public class HorizontalEnemy : Enemy
     protected override void Telegraph()
     {
         List<int> numbers = new List<int>();
-        for (int i = 0; i < GridSystem.row; i++) // Adjust the range as needed
+        for (int i = 0; i < GridSystem.Row; i++) // Adjust the range as needed
         {
             numbers.Add(i);
         }
-        firstrow = numbers[Random.Range(0, numbers.Count)];
-        numbers.Remove(firstrow);
-        secRow = numbers[Random.Range(0, numbers.Count)];
-        firstWarning.transform.position = new Vector3(GridSystem.col/2,firstrow);
-        secondWarning.transform.position = new Vector3(GridSystem.col/2,secRow);
+        _firstrow = numbers[Random.Range(0, numbers.Count)];
+        numbers.Remove(_firstrow);
+        _secRow = numbers[Random.Range(0, numbers.Count)];
+        _firstWarning.transform.position = new Vector3(GridSystem.Col/2,_firstrow);
+        _secondWarning.transform.position = new Vector3(GridSystem.Col/2,_secRow);
 
     }
     
     private void CreateWarningMesh()
     {
-        Destroy(firstWarning);
-        Destroy(secondWarning);
+        Destroy(_firstWarning);
+        Destroy(_secondWarning);
         Vector3[] verts = new Vector3[4];
         Vector2[] uv = new Vector2[4];
         int[] triangle = new int[6];
@@ -125,39 +125,39 @@ public class HorizontalEnemy : Enemy
         mesh.uv = uv;
         mesh.triangles = triangle;
 
-        firstWarning = new GameObject("Warning1",typeof(MeshFilter), typeof(MeshRenderer));
-        firstWarning.transform.localScale = new Vector3(GridSystem.col, 1);
-        firstWarning.GetComponent<MeshFilter>().mesh = mesh;
-        firstWarning.GetComponent<MeshRenderer>().material = warningMaterial;
+        _firstWarning = new GameObject("Warning1",typeof(MeshFilter), typeof(MeshRenderer));
+        _firstWarning.transform.localScale = new Vector3(GridSystem.Col, 1);
+        _firstWarning.GetComponent<MeshFilter>().mesh = mesh;
+        _firstWarning.GetComponent<MeshRenderer>().material = warningMaterial;
         
-        secondWarning = new GameObject("Warning2",typeof(MeshFilter), typeof(MeshRenderer));
-        secondWarning.transform.localScale = new Vector3(GridSystem.col, 1);
-        secondWarning.GetComponent<MeshFilter>().mesh = mesh;
-        secondWarning.GetComponent<MeshRenderer>().material = warningMaterial;
+        _secondWarning = new GameObject("Warning2",typeof(MeshFilter), typeof(MeshRenderer));
+        _secondWarning.transform.localScale = new Vector3(GridSystem.Col, 1);
+        _secondWarning.GetComponent<MeshFilter>().mesh = mesh;
+        _secondWarning.GetComponent<MeshRenderer>().material = warningMaterial;
         
-        matBlock = new MaterialPropertyBlock();
-        matBlock.SetInt("_Highlight", 0);
-        firstWarning.GetComponent<MeshRenderer>().SetPropertyBlock(matBlock);
-        secondWarning.GetComponent<MeshRenderer>().SetPropertyBlock(matBlock);
+        _matBlock = new MaterialPropertyBlock();
+        _matBlock.SetInt("_Highlight", 0);
+        _firstWarning.GetComponent<MeshRenderer>().SetPropertyBlock(_matBlock);
+        _secondWarning.GetComponent<MeshRenderer>().SetPropertyBlock(_matBlock);
     }
 
     public override void HeadupTelegraph()
     {
-        matBlock.SetInt("_Highlight",1);
+        _matBlock.SetInt("_Highlight",1);
         
-        secondWarning.GetComponent<MeshRenderer>().SetPropertyBlock(matBlock);
-        firstWarning.GetComponent<MeshRenderer>().SetPropertyBlock(matBlock);
+        _secondWarning.GetComponent<MeshRenderer>().SetPropertyBlock(_matBlock);
+        _firstWarning.GetComponent<MeshRenderer>().SetPropertyBlock(_matBlock);
     }    
     public override void ReleaseHeadupTelegraph()
     {
-        matBlock.SetInt("_Highlight",0);
-        secondWarning.GetComponent<MeshRenderer>().SetPropertyBlock(matBlock);
-        firstWarning.GetComponent<MeshRenderer>().SetPropertyBlock(matBlock);
+        _matBlock.SetInt("_Highlight",0);
+        _secondWarning.GetComponent<MeshRenderer>().SetPropertyBlock(_matBlock);
+        _firstWarning.GetComponent<MeshRenderer>().SetPropertyBlock(_matBlock);
     }
     
     public override void OnDestroy()
     {
-        Destroy(firstWarning);
-        Destroy(secondWarning);
+        Destroy(_firstWarning);
+        Destroy(_secondWarning);
     }
 }

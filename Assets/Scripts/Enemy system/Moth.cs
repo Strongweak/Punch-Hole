@@ -31,7 +31,7 @@ public class Moth : Enemy
             true, Ease.OutElastic);
         for (int i = 0; i < moveStep; i++)
         {
-            if(startCol > GridSystem.dataGrid.GetLength(0) || startCol < GridSystem.dataGrid.GetLength(0))
+            if(startCol > GridSystem.DataGrid.GetLength(0) || startCol < GridSystem.DataGrid.GetLength(0))
             {
                 yield break;
             }

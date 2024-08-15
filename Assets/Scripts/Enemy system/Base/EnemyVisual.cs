@@ -13,13 +13,22 @@ public class EnemyVisual : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
     [SerializeField] private Enemy enemyParent;
     private RectTransform _rectTransform;
     public Image _image;
-    [SerializeField] private GameObject informationBox;
-
+    private Vector3 _offset;
+    private bool isHolding = false;
     private void Start()
     {
         _rectTransform = GetComponent<RectTransform>();
         _image = GetComponent<Image>();
-        enemyParent = transform.parent.GetComponent<Enemy>();
+    }
+
+    private void Update()
+    {
+        if (!isHolding)
+        {
+            _rectTransform.position = Vector3.Lerp(_rectTransform.position,
+                enemyParent.GetComponent<RectTransform>().position, 10f * Time.deltaTime);
+            
+        }
     }
 
     private void OnEnable()
@@ -31,23 +40,42 @@ public class EnemyVisual : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
     
     public void OnPointerDown(PointerEventData eventData)
     {
-        informationBox.SetActive(true);
+        isHolding = true;
+        Vector2 position;
+        RectTransformUtility.ScreenPointToLocalPointInRectangle(
+            transform.parent as RectTransform, 
+            eventData.position, 
+            eventData.pressEventCamera, 
+            out position);
+
+        Tween.StopAll(onTarget: this);
         Tween.Scale(transform,originalScale,0.2f,Ease.OutExpo);
         enemyParent.HeadupTelegraph();
+        _offset = transform.parent.TransformPoint(position) - _rectTransform.position;
+        _offset.z = 0;
     }
 
     public void OnPointerUp(PointerEventData eventData)
     {
-        informationBox.SetActive(false);
+        isHolding = false;
         //_rectTransform.anchoredPosition = Vector2.zero;
-        Tween.UIAnchoredPosition(_rectTransform,Vector2.zero, 1f, Ease.OutElastic);
+        //Tween.UIAnchoredPosition(_rectTransform,Vector2.zero, 1f, Ease.OutElastic);
         Tween.Scale(transform,originalScale * shrink,0.2f,Ease.OutExpo);
         enemyParent.ReleaseHeadupTelegraph();
     }
 
+    public void SetupParent(Enemy e)
+    {
+        enemyParent = e;
+    }
     public void OnDrag(PointerEventData eventData)
     {
-        _rectTransform.anchoredPosition += eventData.delta;
-        informationBox.SetActive(false);
+        Vector2 newPosition;
+        RectTransformUtility.ScreenPointToLocalPointInRectangle(
+            transform.parent as RectTransform, 
+            eventData.position, 
+            eventData.pressEventCamera, 
+            out newPosition);
+        _rectTransform.position = transform.parent.TransformPoint(newPosition) - _offset;
     }
 }

@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using PrimeTween;
 using UnityEngine;
+using UnityEngine.Serialization;
 using Random = UnityEngine.Random;
 
 public class GameplayManager : MonoBehaviour
@@ -27,7 +28,9 @@ public class GameplayManager : MonoBehaviour
 
     [Header("Enemy")][SerializeField] private int maxNumberOfEnemies = 3;
     public List<Enemy> currentEnemies;
+    [SerializeField] private EnemyVisual _enemyVisualPrefab;
     [SerializeField] private Transform enemyContainer;
+    [SerializeField] private Transform _enemyVisualContainer;
     [SerializeField] private List<Enemy> enemyprefab;
 
     #endregion
@@ -58,8 +61,9 @@ public class GameplayManager : MonoBehaviour
     [SerializeField] private List<Transform> displayTransforms;
     [SerializeField] private List<Transform> worldSpaceTransforms;
 
-    [Space]
-    [Header("UI")]
+    [Space(10f)] [Header("UI")] 
+    private int screenWidth = Screen.width;
+    private int screenHeight = Screen.height;
     [SerializeField] private RectTransform battleWonUI;
     [SerializeField] private RectTransform winUI;
     [SerializeField] private RectTransform loseUI;
@@ -89,6 +93,7 @@ public class GameplayManager : MonoBehaviour
         });
         Observer.Instance.AddObserver(ObserverConstant.OnStateChange, o => ChangeState(o));
         ChangeState(GameState.PlayerTurn);
+        SetupUI();
         StartCoroutine(SpawnEnemy(maxNumberOfEnemies));
     }
 
@@ -132,7 +137,9 @@ public class GameplayManager : MonoBehaviour
         for (int i = 0; i < count; i++)
         {
             Enemy enemy = Instantiate(enemyprefab[Random.Range(0, enemyprefab.Count)], enemyContainer);
-            enemy.gameObject.SetActive(true);
+            EnemyVisual newVisual = Instantiate(_enemyVisualPrefab,_enemyVisualContainer,false);
+            enemy.SetChildVisual(newVisual);
+            newVisual.SetupParent(enemy);
             currentEnemies.Add(enemy);
             yield return new WaitForSeconds(gameplaySpeed);
         }
@@ -147,7 +154,7 @@ public class GameplayManager : MonoBehaviour
         List<Enemy> enemiesToRemove = new List<Enemy>();
         foreach (var enemy in currentEnemies)
         {
-            if (enemy.currentHealth <= 0)
+            if (enemy._currentHealth <= 0)
             {
                 enemiesToRemove.Add(enemy);
             }
@@ -164,6 +171,7 @@ public class GameplayManager : MonoBehaviour
         {
             //
             Debug.Log("Wave cleared");
+            DisplayBattleWinUI();
         }
 
         yield return new WaitForSeconds(gameplaySpeed);
@@ -174,15 +182,15 @@ public class GameplayManager : MonoBehaviour
         Observer.Instance.TriggerEvent(ObserverConstant.OnStateChange, GameState.EnemyTurn);
         foreach (var enemy in currentEnemies)
         {
-            enemy.currentMoveCount--;
+            enemy._currentMoveCount--;
             enemy.UpdateText();
             //not dead, and ready to strike
-            if (enemy.currentMoveCount <= 0 && !enemy.isDead)
+            if (enemy._currentMoveCount <= 0 && !enemy._isDead)
             {
                 yield return Tween.Delay(gameplaySpeed).ToYieldInstruction();
                 yield return StartCoroutine(enemy.EffectEvent());
                 Debug.Log(enemy.name + " is done move");
-                enemy.currentMoveCount = enemy.delayAfterMove;
+                enemy._currentMoveCount = enemy._delayAfterMove;
                 enemy.UpdateText();
             }
         }
@@ -273,14 +281,32 @@ public class GameplayManager : MonoBehaviour
     /// </summary>
     private void SetupUI()
     {
-        battleWonUI.gameObject.SetActive(false);
-        winUI.gameObject.SetActive(false);
-        loseUI.gameObject.SetActive(false);
-        confirmUI.gameObject.SetActive(false);
+        //
+        battleWonUI.anchoredPosition = new Vector2(0, -mainCanvas.rect.height);
+        winUI.anchoredPosition = new Vector2(0, -mainCanvas.rect.height);
+        //
+        loseUI.anchoredPosition = new Vector2(mainCanvas.rect.width, 0);
+        confirmUI.anchoredPosition = new Vector2(mainCanvas.rect.height, 0);
+        //
+        //battleWonUI.gameObject.SetActive(false);
+        //winUI.gameObject.SetActive(false);
+        //loseUI.gameObject.SetActive(false);
+        //confirmUI.gameObject.SetActive(false);
     }
-    private void DisplayBattleWinUI()
+    public void DisplayBattleWinUI()
     {
-
+        battleWonUI.gameObject.SetActive(true);
+        battleWonUI.anchoredPosition = new Vector2(0, -mainCanvas.rect.height);
+        Tween.UIAnchoredPosition(battleWonUI, Vector3.zero,0.3f).OnComplete(() =>
+        {
+            ShakeCamera(1,0.1f,2f);
+        });
+    }
+    public void DisplayLoseUI()
+    {
+        loseUI.gameObject.SetActive(true);
+        loseUI.anchoredPosition = new Vector2(mainCanvas.rect.height, 0);
+        Tween.UIAnchoredPosition(loseUI, Vector3.zero,0.3f);
     }
 }
 

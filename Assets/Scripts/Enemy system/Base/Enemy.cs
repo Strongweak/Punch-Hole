@@ -5,20 +5,21 @@ using PrimeTween;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 public class Enemy : MonoBehaviour, IDamageable
 {
     [Header("Stat")]
     public EnemySO enemyData;
-    protected string name;
+    protected string _name;
     [SerializeField] protected float maxHealth;
-    public int delayAfterMove;
-    protected EnemyTier tier;
-    public float currentHealth;
-    public int currentMoveCount;
-    public bool isDead;
-
+    public int _delayAfterMove;
+    protected EnemyTier _tier;
+    public float _currentHealth;
+    public int _currentMoveCount;
+    public bool _isDead;
+    private Material _mat;
     [Header("Respond")] 
     [SerializeField] private Image healthbarShader;
     [SerializeField] protected EnemyVisual enemyVisual;
@@ -29,16 +30,18 @@ public class Enemy : MonoBehaviour, IDamageable
     public Sequence currentSequence = new Sequence();
     protected virtual void Start()
     {
-        isDead = false;
-        name = enemyData.name;
+        _isDead = false;
+        _name = enemyData.name;
         maxHealth = enemyData.health;
-        delayAfterMove = enemyData.delayAfterMove;
-        tier = enemyData.tier;
-        currentHealth = maxHealth;
-        currentMoveCount = delayAfterMove;
-        numberText.text = currentMoveCount.ToString();
+        _delayAfterMove = enemyData.delayAfterMove;
+        _mat = new Material(healthbarShader.material);
+        healthbarShader.material = _mat;
+        _tier = enemyData.tier;
+        _currentHealth = maxHealth;
+        _currentMoveCount = _delayAfterMove;
+        numberText.text = _currentMoveCount.ToString();
         descriptionTex.text = enemyData.description;
-        healthbarShader.material.SetFloat("_Percentage", currentHealth/ maxHealth);
+        healthbarShader.material.SetFloat("_Percentage", _currentHealth/ maxHealth);
         Telegraph();
     }
     
@@ -59,7 +62,7 @@ public class Enemy : MonoBehaviour, IDamageable
     }
     public void UpdateText()
     {
-        numberText.text = currentMoveCount.ToString();
+        numberText.text = _currentMoveCount.ToString();
     }
     protected virtual void Dead()
     {
@@ -69,13 +72,13 @@ public class Enemy : MonoBehaviour, IDamageable
     public virtual IEnumerator Damage(float damage)
     {
         Shake();
-        currentHealth -= damage;
-        healthbarShader.material.SetFloat("_Percentage", currentHealth/ maxHealth);
-        if (currentHealth <= 0 && !isDead)
+        _currentHealth -= damage;
+        healthbarShader.material.SetFloat("_Percentage", _currentHealth/ maxHealth);
+        if (_currentHealth <= 0 && !_isDead)
         {
-            isDead = true;
-            currentHealth = 0;
-            healthbarShader.material.SetFloat("_Percentage", currentHealth/ maxHealth);
+            _isDead = true;
+            _currentHealth = 0;
+            healthbarShader.material.SetFloat("_Percentage", _currentHealth/ maxHealth);
             yield return new WaitForSeconds(GameplayManager.Instance.gameplaySpeed); 
             Dead();
         }
@@ -96,5 +99,15 @@ public class Enemy : MonoBehaviour, IDamageable
     public virtual void OnDestroy()
     {
         
+    }
+
+    public virtual void OnSpawn()
+    {
+        
+    }
+
+    public void SetChildVisual(EnemyVisual visual)
+    {
+        enemyVisual = visual;
     }
 }

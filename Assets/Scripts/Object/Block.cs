@@ -19,6 +19,7 @@ public class Block : MonoBehaviour ,IPointerDownHandler, IPointerUpHandler,IDrag
     private const float skrink = 0.7f;
     private Vector3 originalScale;
     [SerializeField] private Sprite defaultSprite;
+    private Tween _currentTween;
     private void OnEnable()
     {
         if (_data != null)
@@ -70,10 +71,11 @@ public class Block : MonoBehaviour ,IPointerDownHandler, IPointerUpHandler,IDrag
             return;
         }
         au.PlayOneShot(pickSound);
+        Tween.StopAll(onTarget: this);
         Tween.Scale(transform,originalScale,0.2f,Ease.OutExpo);
         //Debug.Log("Hold");
         Vector2 position = Camera.main.ScreenToWorldPoint(eventData.position);
-        offset = position - (Vector2)transform.position;
+        offset = position - (Vector2)transform.position + Vector2.up * 3f;
         //Tween.Position(transform,position,0.2f,Ease.OutExpo);
     }
     
@@ -84,7 +86,6 @@ public class Block : MonoBehaviour ,IPointerDownHandler, IPointerUpHandler,IDrag
         {
             return;
         }
-        //Debug.Log("Release");
         //GameManager.instance.CheckAddToGrid(this);
         GridSystem.Instance.CheckAddToGrid(this);
         //ReturnOriginalSize();
@@ -101,18 +102,9 @@ public class Block : MonoBehaviour ,IPointerDownHandler, IPointerUpHandler,IDrag
         {
             return;
         }
-        // Vector2 newPosition;
-        // RectTransformUtility.ScreenPointToLocalPointInRectangle(
-        //     transform.parent as RectTransform, 
-        //     eventData.position, 
-        //     eventData.pressEventCamera, 
-        //     out newPosition);
-        // //GameManager.instance.ClearHighLight();
-        // //GameplayManager.Instance.Check
-        // transform.position = transform.parent.TransformPoint(newPosition);
         GridSystem.Instance.ClearHighLight();
         Vector2 position = Camera.main.ScreenToWorldPoint(eventData.position);
-        transform.position = position - offset;
+        transform.position = position - offset + Vector2.up * 3f;
         foreach (var child in visual)
         {
             //GameManager.instance.HighLightCloset(child.transform);

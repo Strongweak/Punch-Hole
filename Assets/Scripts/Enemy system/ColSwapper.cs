@@ -8,10 +8,10 @@ public class ColSwapper : Enemy
 {
     [SerializeField] private int firstCol;
     [SerializeField] private int secCol;
-    private GameObject firstWarning;
-    private GameObject secondWarning;
+    private GameObject _firstWarning;
+    private GameObject _secondWarning;
     [SerializeField] private Material warningMaterial;
-    private MaterialPropertyBlock matBlock;
+    private MaterialPropertyBlock _matBlock;
 
     protected override void Start()
     {
@@ -24,34 +24,34 @@ public class ColSwapper : Enemy
         Tween.ShakeLocalPosition(enemyVisual.transform,Vector3.up* 100f,GameplayManager.Instance.gameplaySpeed,1f, true, Ease.OutElastic);
         Observer.Instance.TriggerEvent(ObserverConstant.OnStateChange, GameState.EnemyTurn);
         Sequence shithead = Sequence.Create(cycles: 1, CycleMode.Yoyo);
-        for (int i = 0; i < GridSystem.row; i++)
+        for (int i = 0; i < GridSystem.Row; i++)
         {
             GameObject tempObject;
             int tempValue;
-            tempObject = GridSystem.dataGrid[firstCol, i].Item1;
-            tempValue = GridSystem.dataGrid[firstCol, i].Item2;
+            tempObject = GridSystem.DataGrid[firstCol, i].Item1;
+            tempValue = GridSystem.DataGrid[firstCol, i].Item2;
             Sequence firstColTween = new Sequence();
             Sequence secondTween = new Sequence();
 
             //Tween.Position(GridSystem.dataGrid[firstCol, i].Item1.transform,new Vector3(secCol, i), 0.2f).Group(Tween.Position(GridSystem.dataGrid[secCol, i].Item1.transform, new Vector3(firstCol,i), 0.2f));
             // //swap the visual first
-            if (GridSystem.dataGrid[firstCol, i].Item1 != null)
+            if (GridSystem.DataGrid[firstCol, i].Item1 != null)
             {
                 //Tween.Scale(GridSystem.dataGrid[firstCol, i].Item1.transform, Vector3.one * 0.2f, GameplayManager.Instance.gameplaySpeed);
-                firstColTween = Tween.Scale(GridSystem.dataGrid[firstCol, i].Item1.transform, Vector3.one * 1.2f, GameplayManager.Instance.gameplaySpeed)
-                    .Chain(Tween.Position(GridSystem.dataGrid[firstCol, i].Item1.transform, new Vector3(secCol, i), GameplayManager.Instance.gameplaySpeed, Ease.OutExpo))
+                firstColTween = Tween.Scale(GridSystem.DataGrid[firstCol, i].Item1.transform, Vector3.one * 1.2f, GameplayManager.Instance.gameplaySpeed)
+                    .Chain(Tween.Position(GridSystem.DataGrid[firstCol, i].Item1.transform, new Vector3(secCol, i), GameplayManager.Instance.gameplaySpeed, Ease.OutExpo))
                     .ChainDelay(GameplayManager.Instance.gameplaySpeed)
-                    .Chain(Tween.Scale(GridSystem.dataGrid[firstCol, i].Item1.transform, Vector3.one, GameplayManager.Instance.gameplaySpeed))
+                    .Chain(Tween.Scale(GridSystem.DataGrid[firstCol, i].Item1.transform, Vector3.one, GameplayManager.Instance.gameplaySpeed))
                     .ChainDelay(GameplayManager.Instance.gameplaySpeed);
                 //GridSystem.dataGrid[firstCol, i].Item1.transform.position = new Vector3(secCol, i);
             }
             
-            if (GridSystem.dataGrid[secCol, i].Item1 != null)
+            if (GridSystem.DataGrid[secCol, i].Item1 != null)
             {
-                secondTween = Tween.Scale(GridSystem.dataGrid[secCol, i].Item1.transform, Vector3.one * 1.2f, GameplayManager.Instance.gameplaySpeed)
-                    .Chain(Tween.Position(GridSystem.dataGrid[secCol, i].Item1.transform, new Vector3(firstCol, i), GameplayManager.Instance.gameplaySpeed, Ease.OutExpo))
+                secondTween = Tween.Scale(GridSystem.DataGrid[secCol, i].Item1.transform, Vector3.one * 1.2f, GameplayManager.Instance.gameplaySpeed)
+                    .Chain(Tween.Position(GridSystem.DataGrid[secCol, i].Item1.transform, new Vector3(firstCol, i), GameplayManager.Instance.gameplaySpeed, Ease.OutExpo))
                     .ChainDelay(GameplayManager.Instance.gameplaySpeed)
-                    .Chain(Tween.Scale(GridSystem.dataGrid[secCol, i].Item1.transform, Vector3.one, GameplayManager.Instance.gameplaySpeed))
+                    .Chain(Tween.Scale(GridSystem.DataGrid[secCol, i].Item1.transform, Vector3.one, GameplayManager.Instance.gameplaySpeed))
                     .ChainDelay(GameplayManager.Instance.gameplaySpeed);
                 //GridSystem.dataGrid[secCol, i].Item1.transform.position = new Vector3(firstCol,i);
             }
@@ -60,10 +60,10 @@ public class ColSwapper : Enemy
             // currentSequence = Sequence.Create(cycles: 1, CycleMode.Yoyo).Group(firstColTween).Group(secondTween)
             //     .ChainCallback(Telegraph).ChainDelay(GameplayManager.Instance.gameplaySpeed);
             // then the data
-            GridSystem.dataGrid[firstCol, i].Item1 = GridSystem.dataGrid[secCol, i].Item1;
-            GridSystem.dataGrid[firstCol, i].Item2 = GridSystem.dataGrid[secCol, i].Item2;
-            GridSystem.dataGrid[secCol, i].Item1 = tempObject;
-            GridSystem.dataGrid[secCol, i].Item2 = tempValue;
+            GridSystem.DataGrid[firstCol, i].Item1 = GridSystem.DataGrid[secCol, i].Item1;
+            GridSystem.DataGrid[firstCol, i].Item2 = GridSystem.DataGrid[secCol, i].Item2;
+            GridSystem.DataGrid[secCol, i].Item1 = tempObject;
+            GridSystem.DataGrid[secCol, i].Item2 = tempValue;
 
         }
 
@@ -74,21 +74,21 @@ public class ColSwapper : Enemy
     protected override void Telegraph()
     {
         List<int> numbers = new List<int>();
-        for (int i = 0; i < GridSystem.row; i++) // Adjust the range as needed
+        for (int i = 0; i < GridSystem.Row; i++) // Adjust the range as needed
         {
             numbers.Add(i);
         }
         firstCol = numbers[Random.Range(0, numbers.Count)];
         numbers.Remove(firstCol);
         secCol = numbers[Random.Range(0, numbers.Count)];
-        firstWarning.transform.position = new Vector3(firstCol,GridSystem.row/2);
-        secondWarning.transform.position = new Vector3(secCol,GridSystem.row/2);
+        _firstWarning.transform.position = new Vector3(firstCol,GridSystem.Row/2);
+        _secondWarning.transform.position = new Vector3(secCol,GridSystem.Row/2);
     }
 
     private void CreateWarningMesh()
     {
-        Destroy(firstWarning);
-        Destroy(secondWarning);
+        Destroy(_firstWarning);
+        Destroy(_secondWarning);
         Vector3[] verts = new Vector3[4];
         Vector2[] uv = new Vector2[4];
         int[] triangle = new int[6]; 
@@ -119,39 +119,39 @@ public class ColSwapper : Enemy
         mesh.vertices = verts;
         mesh.uv = uv;
         mesh.triangles = triangle;
-        firstWarning = new GameObject("Warning1",typeof(MeshFilter), typeof(MeshRenderer));
-        firstWarning.transform.localScale = new Vector3(1, GridSystem.row);
-        firstWarning.GetComponent<MeshFilter>().mesh = mesh;
-        firstWarning.GetComponent<MeshRenderer>().material = warningMaterial;
+        _firstWarning = new GameObject("Warning1",typeof(MeshFilter), typeof(MeshRenderer));
+        _firstWarning.transform.localScale = new Vector3(1, GridSystem.Row);
+        _firstWarning.GetComponent<MeshFilter>().mesh = mesh;
+        _firstWarning.GetComponent<MeshRenderer>().material = warningMaterial;
         
-        secondWarning = new GameObject("Warning2",typeof(MeshFilter), typeof(MeshRenderer));
-        secondWarning.transform.localScale = new Vector3(1, GridSystem.row);
-        secondWarning.GetComponent<MeshFilter>().mesh = mesh;
-        secondWarning.GetComponent<MeshRenderer>().material = warningMaterial;
+        _secondWarning = new GameObject("Warning2",typeof(MeshFilter), typeof(MeshRenderer));
+        _secondWarning.transform.localScale = new Vector3(1, GridSystem.Row);
+        _secondWarning.GetComponent<MeshFilter>().mesh = mesh;
+        _secondWarning.GetComponent<MeshRenderer>().material = warningMaterial;
         
-        matBlock = new MaterialPropertyBlock();
-        matBlock.SetInt("_Highlight", 0);
-        firstWarning.GetComponent<MeshRenderer>().SetPropertyBlock(matBlock);
-        secondWarning.GetComponent<MeshRenderer>().SetPropertyBlock(matBlock);
+        _matBlock = new MaterialPropertyBlock();
+        _matBlock.SetInt("_Highlight", 0);
+        _firstWarning.GetComponent<MeshRenderer>().SetPropertyBlock(_matBlock);
+        _secondWarning.GetComponent<MeshRenderer>().SetPropertyBlock(_matBlock);
     }
     
     public override void HeadupTelegraph()
     {
-        matBlock.SetInt("_Highlight",1);
-        secondWarning.GetComponent<MeshRenderer>().SetPropertyBlock(matBlock);
-        firstWarning.GetComponent<MeshRenderer>().SetPropertyBlock(matBlock);
+        _matBlock.SetInt("_Highlight",1);
+        _secondWarning.GetComponent<MeshRenderer>().SetPropertyBlock(_matBlock);
+        _firstWarning.GetComponent<MeshRenderer>().SetPropertyBlock(_matBlock);
 
     }    
     public override void ReleaseHeadupTelegraph()
     {
-        matBlock.SetInt("_Highlight",0);
-        secondWarning.GetComponent<MeshRenderer>().SetPropertyBlock(matBlock);
-        firstWarning.GetComponent<MeshRenderer>().SetPropertyBlock(matBlock);
+        _matBlock.SetInt("_Highlight",0);
+        _secondWarning.GetComponent<MeshRenderer>().SetPropertyBlock(_matBlock);
+        _firstWarning.GetComponent<MeshRenderer>().SetPropertyBlock(_matBlock);
     }
 
     public override void OnDestroy()
     {
-        Destroy(firstWarning);
-        Destroy(secondWarning);
+        Destroy(_firstWarning);
+        Destroy(_secondWarning);
     }
 }
