@@ -27,7 +27,6 @@ public class EnemyVisual : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
         {
             _rectTransform.position = Vector3.Lerp(_rectTransform.position,
                 enemyParent.GetComponent<RectTransform>().position, 10f * Time.deltaTime);
-            
         }
     }
 
@@ -53,6 +52,7 @@ public class EnemyVisual : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
         enemyParent.HeadupTelegraph();
         _offset = transform.parent.TransformPoint(position) - _rectTransform.position;
         _offset.z = 0;
+        Observer.Instance.TriggerEvent(ObserverConstant.OnDisplayEnemyInfo,enemyParent.enemyData);
     }
 
     public void OnPointerUp(PointerEventData eventData)
@@ -62,6 +62,7 @@ public class EnemyVisual : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
         //Tween.UIAnchoredPosition(_rectTransform,Vector2.zero, 1f, Ease.OutElastic);
         Tween.Scale(transform,originalScale * shrink,0.2f,Ease.OutExpo);
         enemyParent.ReleaseHeadupTelegraph();
+        Observer.Instance.TriggerEvent(ObserverConstant.OnDisplayEnemyInfo,null);
     }
 
     public void SetupParent(Enemy e)

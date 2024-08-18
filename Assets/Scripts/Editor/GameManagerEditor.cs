@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-[CustomEditor(typeof(GameplayManager))]
+[CustomEditor(typeof(GameplayUI))]
 public class GameManagerEditor : Editor
 {
     public override void OnInspectorGUI()
     {
         base.OnInspectorGUI();
-        GameplayManager colliderCreator = (GameplayManager)target;
+        GameplayUI colliderCreator = (GameplayUI)target;
         if (GUILayout.Button("Win"))
         {
             colliderCreator.DisplayBattleWinUI();

@@ -15,5 +15,5 @@ MonoBehaviour:
   name: Row Swap
   description: Randomly swap 2 row
   health: 30
-  delayAfterMove: 5
+  delayAfterMove: 1
   tier: 0

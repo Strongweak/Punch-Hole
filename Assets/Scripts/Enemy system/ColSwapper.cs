@@ -21,7 +21,7 @@ public class ColSwapper : Enemy
     
     public override IEnumerator EffectEvent()
     {
-        Tween.ShakeLocalPosition(enemyVisual.transform,Vector3.up* 100f,GameplayManager.Instance.gameplaySpeed,1f, true, Ease.OutElastic);
+        Tween.ShakeLocalPosition(enemyVisual.transform,Vector3.up* 100f,GameplayManager._gameplaySpeed,1f, true, Ease.OutElastic);
         Observer.Instance.TriggerEvent(ObserverConstant.OnStateChange, GameState.EnemyTurn);
         Sequence shithead = Sequence.Create(cycles: 1, CycleMode.Yoyo);
         for (int i = 0; i < GridSystem.Row; i++)
@@ -38,21 +38,21 @@ public class ColSwapper : Enemy
             if (GridSystem.DataGrid[firstCol, i].Item1 != null)
             {
                 //Tween.Scale(GridSystem.dataGrid[firstCol, i].Item1.transform, Vector3.one * 0.2f, GameplayManager.Instance.gameplaySpeed);
-                firstColTween = Tween.Scale(GridSystem.DataGrid[firstCol, i].Item1.transform, Vector3.one * 1.2f, GameplayManager.Instance.gameplaySpeed)
-                    .Chain(Tween.Position(GridSystem.DataGrid[firstCol, i].Item1.transform, new Vector3(secCol, i), GameplayManager.Instance.gameplaySpeed, Ease.OutExpo))
-                    .ChainDelay(GameplayManager.Instance.gameplaySpeed)
-                    .Chain(Tween.Scale(GridSystem.DataGrid[firstCol, i].Item1.transform, Vector3.one, GameplayManager.Instance.gameplaySpeed))
-                    .ChainDelay(GameplayManager.Instance.gameplaySpeed);
+                firstColTween = Tween.Scale(GridSystem.DataGrid[firstCol, i].Item1.transform, Vector3.one * 1.2f, GameplayManager._gameplaySpeed)
+                    .Chain(Tween.Position(GridSystem.DataGrid[firstCol, i].Item1.transform, new Vector3(secCol, i), GameplayManager._gameplaySpeed, Ease.OutExpo))
+                    .ChainDelay(GameplayManager._gameplaySpeed)
+                    .Chain(Tween.Scale(GridSystem.DataGrid[firstCol, i].Item1.transform, Vector3.one, GameplayManager._gameplaySpeed))
+                    .ChainDelay(GameplayManager._gameplaySpeed);
                 //GridSystem.dataGrid[firstCol, i].Item1.transform.position = new Vector3(secCol, i);
             }
             
             if (GridSystem.DataGrid[secCol, i].Item1 != null)
             {
-                secondTween = Tween.Scale(GridSystem.DataGrid[secCol, i].Item1.transform, Vector3.one * 1.2f, GameplayManager.Instance.gameplaySpeed)
-                    .Chain(Tween.Position(GridSystem.DataGrid[secCol, i].Item1.transform, new Vector3(firstCol, i), GameplayManager.Instance.gameplaySpeed, Ease.OutExpo))
-                    .ChainDelay(GameplayManager.Instance.gameplaySpeed)
-                    .Chain(Tween.Scale(GridSystem.DataGrid[secCol, i].Item1.transform, Vector3.one, GameplayManager.Instance.gameplaySpeed))
-                    .ChainDelay(GameplayManager.Instance.gameplaySpeed);
+                secondTween = Tween.Scale(GridSystem.DataGrid[secCol, i].Item1.transform, Vector3.one * 1.2f, GameplayManager._gameplaySpeed)
+                    .Chain(Tween.Position(GridSystem.DataGrid[secCol, i].Item1.transform, new Vector3(firstCol, i), GameplayManager._gameplaySpeed, Ease.OutExpo))
+                    .ChainDelay(GameplayManager._gameplaySpeed)
+                    .Chain(Tween.Scale(GridSystem.DataGrid[secCol, i].Item1.transform, Vector3.one, GameplayManager._gameplaySpeed))
+                    .ChainDelay(GameplayManager._gameplaySpeed);
                 //GridSystem.dataGrid[secCol, i].Item1.transform.position = new Vector3(firstCol,i);
             }
 
@@ -151,6 +151,7 @@ public class ColSwapper : Enemy
 
     public override void OnDestroy()
     {
+        base.OnDestroy();
         Destroy(_firstWarning);
         Destroy(_secondWarning);
     }

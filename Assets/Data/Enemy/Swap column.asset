@@ -15,5 +15,5 @@ MonoBehaviour:
   name: Col Swap
   description: Randomly swap 2 column
   health: 20
-  delayAfterMove: 5
+  delayAfterMove: 1
   tier: 0

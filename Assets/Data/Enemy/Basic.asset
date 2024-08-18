@@ -15,5 +15,5 @@ MonoBehaviour:
   name: Basic
   description: Deal damage by clearing row or column
   health: 10
-  delayAfterMove: 5
+  delayAfterMove: 0
   tier: 0

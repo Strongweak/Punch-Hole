@@ -178,15 +178,14 @@ public class GridSystem : MonoBehaviour
         GameplayManager.Instance.currentBlock.Remove(block);
         Destroy(block.gameObject);
         ClearHighLight();
-        //the flavor
-        StartCoroutine(CheckLineAndRow());
+        Observer.Instance.TriggerEvent(ObserverConstant.OnPlacingShape);
     }
 
     /// <summary>
     /// check when block is put in which slot, start checking row and column of it
     /// </summary>
     /// <returns></returns>
-    private IEnumerator CheckLineAndRow()
+    public IEnumerator CheckLineAndRow()
     {
         Observer.Instance.TriggerEvent(ObserverConstant.OnStateChange, GameState.Holdup);
         bool haveClear = false;
@@ -228,7 +227,7 @@ public class GridSystem : MonoBehaviour
             foreach (var enemy in GameplayManager.Instance.currentEnemies)
             {
                 yield return StartCoroutine(enemy.Damage(totalDamage));
-                yield return new WaitForSeconds(GameplayManager.Instance.gameplaySpeed);
+                yield return GameplayManager._delay;
             }
         }
         else
@@ -236,8 +235,8 @@ public class GridSystem : MonoBehaviour
             yield return null;
         }
 
-        Observer.Instance.TriggerEvent(ObserverConstant.OnPlayerMove);
-        Observer.Instance.TriggerEvent(ObserverConstant.OnStateChange, GameState.PlayerTurn);
+        //Observer.Instance.TriggerEvent(ObserverConstant.OnPlacingShape);
+        //Observer.Instance.TriggerEvent(ObserverConstant.OnStateChange, GameState.PlayerTurn);
     }
 
     public IEnumerator CheckLineAndRowAfterUpdate()
@@ -286,7 +285,7 @@ public class GridSystem : MonoBehaviour
                 enemy.Damage(totalDamage);
             }
 
-            yield return new WaitForSeconds(GameplayManager.Instance.gameplaySpeed);
+            yield return GameplayManager._delay;
         }
         else
         {
@@ -503,12 +502,12 @@ public class GridSystem : MonoBehaviour
         }
     }
 
-    private IEnumerator ClearBoard()
+    public IEnumerator ClearBoard()
     {
         Observer.Instance.TriggerEvent(ObserverConstant.OnStateChange, GameState.Holdup);
         Debug.Log("OUT OF MOVE");
         GameplayManager.Instance.ShakeCamera(2f, 0.5f, 10f);
-        yield return new WaitForSeconds(GameplayManager.Instance.gameplaySpeed * 2f);
+        yield return new WaitForSeconds(GameplayManager._gameplaySpeed * 2f);
 
         for (int i = 0; i < Col; i++)
         {
@@ -516,7 +515,7 @@ public class GridSystem : MonoBehaviour
             {
                 DataGrid[i, j].Item2 = 0;
                 Destroy(DataGrid[i, j].Item1);
-                yield return new WaitForSeconds(GameplayManager.Instance.gameplaySpeed / 10f);
+                yield return new WaitForSeconds(GameplayManager._gameplaySpeed / 10f);
             }
         }
 

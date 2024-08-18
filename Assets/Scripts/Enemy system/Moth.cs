@@ -27,7 +27,7 @@ public class Moth : Enemy
 
     public override IEnumerator EffectEvent()
     {
-        Tween.ShakeLocalPosition(enemyVisual.transform, Vector3.up * 100f, GameplayManager.Instance.gameplaySpeed, 1f,
+        Tween.ShakeLocalPosition(enemyVisual.transform, Vector3.up * 100f, GameplayManager._gameplaySpeed, 1f,
             true, Ease.OutElastic);
         for (int i = 0; i < moveStep; i++)
         {

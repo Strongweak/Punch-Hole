@@ -9,16 +9,16 @@ using Random = UnityEngine.Random;
 public class GameplayManager : MonoBehaviour
 {
     public static GameplayManager Instance;
-    public float gameplaySpeed = 0.2f;
+    public static float _gameplaySpeed = 0.2f;
+    public static WaitForSeconds _delay = new WaitForSeconds(_gameplaySpeed);
 
     #region Player stat
 
-    [Header("Player stat")]
-    [SerializeField]
-    private int maxLife;
+    [Header("Player stat")] [SerializeField]
+    private int _maxLife;
 
     [SerializeField] private ShapeListSO spawnableBlock;
-    [SerializeField] private int maxVisibleShape;
+    public int maxVisibleShape;
     public List<Block> currentBlock;
     private int currentlife;
 
@@ -26,18 +26,15 @@ public class GameplayManager : MonoBehaviour
 
     #region Enemy stat
 
-    [Header("Enemy")][SerializeField] private int maxNumberOfEnemies = 3;
+    [Header("Enemy")] [SerializeField] private int maxNumberOfEnemies = 3;
     public List<Enemy> currentEnemies;
-    [SerializeField] private EnemyVisual _enemyVisualPrefab;
-    [SerializeField] private Transform enemyContainer;
-    [SerializeField] private Transform _enemyVisualContainer;
     [SerializeField] private List<Enemy> enemyprefab;
 
     #endregion
 
     #region Scoring
 
-    [Header("Score")][SerializeField] private ScoringSO comboScore;
+    [Header("Score")] [SerializeField] private ScoringSO comboScore;
     private int currentScore;
     [SerializeField] private int beforeStartStreak = 3;
     [SerializeField] private int currentChain = 0;
@@ -48,26 +45,8 @@ public class GameplayManager : MonoBehaviour
 
     #region Camera
 
-    [SerializeField] private Camera cam;
+    public Camera cam;
 
-    #endregion
-
-    #region UI
-
-    [SerializeField] private RectTransform mainCanvas;
-    [Header("Visual and block")]
-    [SerializeField] private Transform shapeContainer;
-    [SerializeField] private Transform positionTemplate;
-    [SerializeField] private List<Transform> displayTransforms;
-    [SerializeField] private List<Transform> worldSpaceTransforms;
-
-    [Space(10f)] [Header("UI")] 
-    private int screenWidth = Screen.width;
-    private int screenHeight = Screen.height;
-    [SerializeField] private RectTransform battleWonUI;
-    [SerializeField] private RectTransform winUI;
-    [SerializeField] private RectTransform loseUI;
-    [SerializeField] private RectTransform confirmUI;
     #endregion
 
     #region Game state
@@ -84,17 +63,46 @@ public class GameplayManager : MonoBehaviour
     private void Start()
     {
         currentBlock = new List<Block>();
-        currentlife = maxLife;
+        currentlife = _maxLife;
         StartCoroutine(SetupGameplay());
-        Observer.Instance.AddObserver(ObserverConstant.OnPlayerMove, o =>
+        Observer.Instance.AddObserver(ObserverConstant.OnPlacingShape, o =>
         {
-            StartCoroutine(CheckEnemyTurn());
-            //StartCoroutine(SpawnNewBlocks());
+            StartCoroutine(GameplayFlow());
+            //StartCoroutine(CheckEnemyTurn());
         });
         Observer.Instance.AddObserver(ObserverConstant.OnStateChange, o => ChangeState(o));
         ChangeState(GameState.PlayerTurn);
-        SetupUI();
+        GameplayUI.Instance.SetupUI();
         StartCoroutine(SpawnEnemy(maxNumberOfEnemies));
+    }
+
+    /// <summary>
+    /// The main gameplay flow must be manage here, trigger after shape put on board
+    /// player turn => [placing block] => player does effect(damage, line clear...) => check enemy health
+    /// => check enemy turn => enemy movement => spawn set of shapes (if out of shape) => check game over => player turn
+    /// </summary>
+    /// <returns></returns>
+    private IEnumerator GameplayFlow()
+    {
+        Debug.Log("PHASE: line clear phase");
+        yield return StartCoroutine(GridSystem.Instance.CheckLineAndRow());
+        if (currentBlock.Count == 0)
+        {
+            Debug.Log("PHASE: Check enemy turn");
+            yield return StartCoroutine(EnemyTurnCountdown());
+        }
+        Debug.Log("PHASE: check enemy stat");
+        yield return StartCoroutine(CheckCurrentEnemyStat());
+        Debug.Log("PHASE: line clear phase");
+        yield return StartCoroutine(GridSystem.Instance.CheckLineAndRowAfterUpdate());
+        if (currentBlock.Count == 0)
+        {
+            Debug.Log("PHASE: spawn new block");
+            yield return StartCoroutine(SpawnNewBlocks());
+        }
+        Debug.Log("PHASE: check gameover");
+        GridSystem.Instance.CheckOutOfMove();
+        yield return _delay;
     }
 
     public void ShakeCamera(float strength, float duration, float frequency)
@@ -108,24 +116,24 @@ public class GameplayManager : MonoBehaviour
     /// <returns></returns>
     public IEnumerator SpawnNewBlocks()
     {
-        Observer.Instance.TriggerEvent(ObserverConstant.OnStateChange, GameState.Holdup);
         yield return null;
         for (int i = 0; i < maxVisibleShape; i++)
         {
-            if (worldSpaceTransforms[i].transform.childCount == 0)
+            if (GameplayUI.Instance.worldSpaceTransforms[i].transform.childCount == 0)
             {
                 Block newBlock =
                     Instantiate(spawnableBlock.spawnableBlock[Random.Range(0, spawnableBlock.spawnableBlock.Count)]);
-                newBlock.transform.parent = worldSpaceTransforms[i];
+                newBlock.transform.parent = GameplayUI.Instance.worldSpaceTransforms[i];
                 newBlock.transform.localPosition = Vector3.zero;
                 currentBlock.Add(newBlock);
             }
         }
 
-        yield return new WaitForSeconds(gameplaySpeed);
-        Observer.Instance.TriggerEvent(ObserverConstant.OnStateChange, GameState.PlayerTurn);
-        GridSystem.Instance.CheckOutOfMove();
+        yield return _delay;
     }
+
+    #region Enemy management
+
     /// <summary>
     /// Spawnning enemy
     /// </summary>
@@ -136,12 +144,11 @@ public class GameplayManager : MonoBehaviour
         currentEnemies = new List<Enemy>();
         for (int i = 0; i < count; i++)
         {
-            Enemy enemy = Instantiate(enemyprefab[Random.Range(0, enemyprefab.Count)], enemyContainer);
-            EnemyVisual newVisual = Instantiate(_enemyVisualPrefab,_enemyVisualContainer,false);
-            enemy.SetChildVisual(newVisual);
-            newVisual.SetupParent(enemy);
+            Enemy enemy = Instantiate(enemyprefab[Random.Range(0, enemyprefab.Count)],
+                GameplayUI.Instance.enemyContainer);
+            GameplayUI.Instance.SpawnEnemyVisualForEnemy(enemy);
             currentEnemies.Add(enemy);
-            yield return new WaitForSeconds(gameplaySpeed);
+            yield return _delay;
         }
     }
 
@@ -149,7 +156,7 @@ public class GameplayManager : MonoBehaviour
     /// Manage the movement of enemies, enemies will taking turn one after another
     /// </summary>
     /// <returns></returns>
-    private IEnumerator CheckCurrentEnemy()
+    private IEnumerator CheckCurrentEnemyStat()
     {
         List<Enemy> enemiesToRemove = new List<Enemy>();
         foreach (var enemy in currentEnemies)
@@ -162,7 +169,7 @@ public class GameplayManager : MonoBehaviour
 
         foreach (var enemy in enemiesToRemove)
         {
-            yield return new WaitForSeconds(gameplaySpeed);
+            yield return _delay;
             currentEnemies.Remove(enemy);
             Destroy(enemy.gameObject);
         }
@@ -171,15 +178,14 @@ public class GameplayManager : MonoBehaviour
         {
             //
             Debug.Log("Wave cleared");
-            DisplayBattleWinUI();
+            Victory();
         }
 
-        yield return new WaitForSeconds(gameplaySpeed);
+        yield return _delay;
     }
 
-    private IEnumerator CheckEnemyTurn()
+    private IEnumerator EnemyTurnCountdown()
     {
-        Observer.Instance.TriggerEvent(ObserverConstant.OnStateChange, GameState.EnemyTurn);
         foreach (var enemy in currentEnemies)
         {
             enemy._currentMoveCount--;
@@ -187,79 +193,22 @@ public class GameplayManager : MonoBehaviour
             //not dead, and ready to strike
             if (enemy._currentMoveCount <= 0 && !enemy._isDead)
             {
-                yield return Tween.Delay(gameplaySpeed).ToYieldInstruction();
+                yield return _delay;
                 yield return StartCoroutine(enemy.EffectEvent());
                 Debug.Log(enemy.name + " is done move");
                 enemy._currentMoveCount = enemy._delayAfterMove;
                 enemy.UpdateText();
             }
         }
-
-        yield return StartCoroutine(CheckCurrentEnemy());
-        yield return StartCoroutine(GridSystem.Instance.CheckLineAndRowAfterUpdate());
-        Observer.Instance.TriggerEvent(ObserverConstant.OnStateChange, GameState.PlayerTurn);
-        StartCoroutine(SpawnNewBlocks());
     }
 
-    //<SUMMARY>
-    // Unfinished
-    //<SUMMARY>
-    public void ModifySlot(int count)
-    {
-        if (count > 0)
-        {
-            for (int i = 0; i < maxVisibleShape; i++)
-            {
-                //worldSpaceTransforms.Remove();
-            }
-        }
-        else
-        {
-            for (int i = 0; i < count; i++)
-            {
-                Transform newUI = Instantiate(positionTemplate, shapeContainer, false);
-                newUI.gameObject.SetActive(true);
-                newUI.gameObject.SetActive(true);
-                displayTransforms.Add(newUI);
-                GameObject newWorldSpace = new GameObject();
-                worldSpaceTransforms.Add(newWorldSpace.transform);
-            }
-        }
-    }
+    #endregion
 
     /// <summary>
     /// Setup the gameplay space for the rest of the play section
     /// include, camera, grid, block position...
     /// </summary>
     /// <returns></returns>
-    private IEnumerator SetupGameplay()
-    {
-        yield return StartCoroutine(GridSystem.Instance.GenerateGrid());
-        displayTransforms = new List<Transform>();
-        worldSpaceTransforms = new List<Transform>();
-        for (int i = 0; i < maxVisibleShape; i++)
-        {
-            Transform newUI = Instantiate(positionTemplate, shapeContainer, false);
-            newUI.gameObject.SetActive(true);
-            displayTransforms.Add(newUI);
-            GameObject newWorldSpace = new GameObject();
-            newWorldSpace.name = "slot";
-            worldSpaceTransforms.Add(newWorldSpace.transform);
-        }
-
-        yield return new WaitForEndOfFrame();
-        for (int i = 0; i < maxVisibleShape; i++)
-        {
-            Vector3 worldPos;
-            Vector3 screenPosition = RectTransformUtility.WorldToScreenPoint(cam, displayTransforms[i].position);
-            RectTransformUtility.ScreenPointToWorldPointInRectangle(mainCanvas, screenPosition, cam, out worldPos);
-            worldPos.z = 0;
-            worldSpaceTransforms[i].transform.position = worldPos;
-        }
-
-        StartCoroutine(SpawnNewBlocks());
-    }
-
     private void ChangeState(object o)
     {
         _state = (GameState)o;
@@ -276,38 +225,42 @@ public class GameplayManager : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Setup first time playing UI
-    /// </summary>
-    private void SetupUI()
+    #region Gameplay management
+
+    private void Victory()
     {
-        //
-        battleWonUI.anchoredPosition = new Vector2(0, -mainCanvas.rect.height);
-        winUI.anchoredPosition = new Vector2(0, -mainCanvas.rect.height);
-        //
-        loseUI.anchoredPosition = new Vector2(mainCanvas.rect.width, 0);
-        confirmUI.anchoredPosition = new Vector2(mainCanvas.rect.height, 0);
-        //
-        //battleWonUI.gameObject.SetActive(false);
-        //winUI.gameObject.SetActive(false);
-        //loseUI.gameObject.SetActive(false);
-        //confirmUI.gameObject.SetActive(false);
-    }
-    public void DisplayBattleWinUI()
-    {
-        battleWonUI.gameObject.SetActive(true);
-        battleWonUI.anchoredPosition = new Vector2(0, -mainCanvas.rect.height);
-        Tween.UIAnchoredPosition(battleWonUI, Vector3.zero,0.3f).OnComplete(() =>
+        GameplayUI.Instance.DisplayBattleWinUI();
+        foreach (var block in currentBlock)
         {
-            ShakeCamera(1,0.1f,2f);
-        });
+            currentBlock.Remove(block);
+            Destroy(block.gameObject);
+        }
+
+        StartCoroutine(GridSystem.Instance.ClearBoard());
     }
-    public void DisplayLoseUI()
+
+    private IEnumerator SetupGameplay()
     {
-        loseUI.gameObject.SetActive(true);
-        loseUI.anchoredPosition = new Vector2(mainCanvas.rect.height, 0);
-        Tween.UIAnchoredPosition(loseUI, Vector3.zero,0.3f);
+        //Generate grid
+        yield return StartCoroutine(GridSystem.Instance.GenerateGrid());
+        //create world position of ui for the block to spawn
+        yield return StartCoroutine(GameplayUI.Instance.SetupWorldPosition());
+        //now we spawn the block
+        StartCoroutine(SpawnNewBlocks());
     }
+
+    public void NextLevel()
+    {
+        GameplayUI.Instance.DisplayBattleWinUI(false);
+        StartCoroutine(SpawnEnemy(maxNumberOfEnemies));
+        StartCoroutine(SpawnNewBlocks());
+    }
+
+    public void RemoveBlock(Block block)
+    {
+        
+    }
+    #endregion
 }
 
 public enum GameState

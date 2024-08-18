@@ -64,7 +64,7 @@ public class Enemy : MonoBehaviour, IDamageable
     {
         numberText.text = _currentMoveCount.ToString();
     }
-    protected virtual void Dead()
+    public virtual void Dead()
     {
         enemyVisual._image.color = Color.red;
     }
@@ -79,10 +79,10 @@ public class Enemy : MonoBehaviour, IDamageable
             _isDead = true;
             _currentHealth = 0;
             healthbarShader.material.SetFloat("_Percentage", _currentHealth/ maxHealth);
-            yield return new WaitForSeconds(GameplayManager.Instance.gameplaySpeed); 
+            yield return GameplayManager._delay; 
             Dead();
         }
-        yield return new WaitForSeconds(GameplayManager.Instance.gameplaySpeed);
+        yield return GameplayManager._delay;
     }
     /// <summary>
     /// Do highlight on chosen enemy to know which movement warning belong to
@@ -98,7 +98,7 @@ public class Enemy : MonoBehaviour, IDamageable
 
     public virtual void OnDestroy()
     {
-        
+        Destroy(enemyVisual.gameObject);
     }
 
     public virtual void OnSpawn()

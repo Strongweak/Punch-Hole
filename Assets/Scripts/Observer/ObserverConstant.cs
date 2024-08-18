@@ -7,11 +7,7 @@ public class ObserverConstant
     //
     public const string OnPlayerDead = "OnPlayerDead";
     public const string OnPlayerTakingDamage = "OnPlayerTakingDamage";
-    public const string OnPlayerMove = "OnPlayerMove";
-    
-    //damage
-    public const string onHorizontalLineClear = "onHorizontalLineClear";
-    public const string onVerticalLineClear= "onVerticalLineClear";
+    public const string OnPlacingShape = "OnPlacingShape";
     
     //
     public const string OnStateChange = "OnStateChange";
@@ -20,4 +16,6 @@ public class ObserverConstant
     //
     
     public const string ShakeCamera = "ShakeCamera";
+
+    public const string OnDisplayEnemyInfo = "OnDisplayEnemyInfo";
 }

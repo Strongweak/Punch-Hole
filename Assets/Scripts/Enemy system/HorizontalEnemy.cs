@@ -21,7 +21,7 @@ public class HorizontalEnemy : Enemy
 
     public override IEnumerator EffectEvent()
     {
-         Tween.ShakeLocalPosition(enemyVisual.transform, Vector3.up * 100f, GameplayManager.Instance.gameplaySpeed, 1f,
+         Tween.ShakeLocalPosition(enemyVisual.transform, Vector3.up * 100f, GameplayManager._gameplaySpeed, 1f,
              true, Ease.OutElastic);
         Sequence shithead = Sequence.Create(cycles: 1, CycleMode.Yoyo);
         Observer.Instance.TriggerEvent(ObserverConstant.OnStateChange, GameState.EnemyTurn);
@@ -38,13 +38,13 @@ public class HorizontalEnemy : Enemy
             if (GridSystem.DataGrid[i, _firstrow].Item1 != null)
             {
                 firstColTween = Tween.Scale(GridSystem.DataGrid[i, _firstrow].Item1.transform, Vector3.one * 1.2f,
-                        GameplayManager.Instance.gameplaySpeed)
+                        GameplayManager._gameplaySpeed)
                     .Chain(Tween.Position(GridSystem.DataGrid[i, _firstrow].Item1.transform, new Vector3(i, _secRow),
-                        GameplayManager.Instance.gameplaySpeed, Ease.OutExpo))
-                    .ChainDelay(GameplayManager.Instance.gameplaySpeed)
+                        GameplayManager._gameplaySpeed, Ease.OutExpo))
+                    .ChainDelay(GameplayManager._gameplaySpeed)
                     .Chain(Tween.Scale(GridSystem.DataGrid[i, _firstrow].Item1.transform, Vector3.one,
-                        GameplayManager.Instance.gameplaySpeed))
-                    .ChainDelay(GameplayManager.Instance.gameplaySpeed);
+                        GameplayManager._gameplaySpeed))
+                    .ChainDelay(GameplayManager._gameplaySpeed);
 
             }
 
@@ -52,13 +52,13 @@ public class HorizontalEnemy : Enemy
             if (GridSystem.DataGrid[i, _secRow].Item1 != null)
             {
                 secondTween = Tween.Scale(GridSystem.DataGrid[i, _secRow].Item1.transform, Vector3.one * 1.2f,
-                        GameplayManager.Instance.gameplaySpeed)
+                        GameplayManager._gameplaySpeed)
                     .Chain(Tween.Position(GridSystem.DataGrid[i, _secRow].Item1.transform, new Vector3(i, _firstrow),
-                        GameplayManager.Instance.gameplaySpeed, Ease.OutExpo))
-                    .ChainDelay(GameplayManager.Instance.gameplaySpeed)
+                        GameplayManager._gameplaySpeed, Ease.OutExpo))
+                    .ChainDelay(GameplayManager._gameplaySpeed)
                     .Chain(Tween.Scale(GridSystem.DataGrid[i, _secRow].Item1.transform, Vector3.one,
-                        GameplayManager.Instance.gameplaySpeed))
-                    .ChainDelay(GameplayManager.Instance.gameplaySpeed);
+                        GameplayManager._gameplaySpeed))
+                    .ChainDelay(GameplayManager._gameplaySpeed);
             }
 
             // currentSequence = Sequence.Create(cycles: 1, CycleMode.Yoyo).Group(firstColTween).Group(secondTween)
@@ -157,6 +157,7 @@ public class HorizontalEnemy : Enemy
     
     public override void OnDestroy()
     {
+        base.OnDestroy();
         Destroy(_firstWarning);
         Destroy(_secondWarning);
     }

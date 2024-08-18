@@ -15,5 +15,5 @@ MonoBehaviour:
   name: Moth
   description: Move randomly on the board, destroy cell on the way
   health: 40
-  delayAfterMove: 6
+  delayAfterMove: 2
   tier: 1
