@@ -14,7 +14,8 @@ public class GameplayManager : MonoBehaviour
 
     #region Player stat
 
-    [Header("Player stat")] [SerializeField]
+    [Header("Player stat")]
+    [SerializeField]
     private int _maxLife;
 
     [SerializeField] private ShapeListSO spawnableBlock;
@@ -26,15 +27,15 @@ public class GameplayManager : MonoBehaviour
 
     #region Enemy stat
 
-    [Header("Enemy")] [SerializeField] private int maxNumberOfEnemies = 3;
+    [Header("Enemy")][SerializeField] private int maxNumberOfEnemies = 3;
     public List<Enemy> currentEnemies;
     [SerializeField] private List<Enemy> enemyprefab;
-
+    bool inBattle;
     #endregion
 
     #region Scoring
 
-    [Header("Score")] [SerializeField] private ScoringSO comboScore;
+    [Header("Score")][SerializeField] private ScoringSO comboScore;
     private int currentScore;
     [SerializeField] private int beforeStartStreak = 3;
     [SerializeField] private int currentChain = 0;
@@ -95,7 +96,7 @@ public class GameplayManager : MonoBehaviour
         yield return StartCoroutine(CheckCurrentEnemyStat());
         Debug.Log("PHASE: line clear phase");
         yield return StartCoroutine(GridSystem.Instance.CheckLineAndRowAfterUpdate());
-        if (currentBlock.Count == 0)
+        if (currentBlock.Count == 0 && inBattle)
         {
             Debug.Log("PHASE: spawn new block");
             yield return StartCoroutine(SpawnNewBlocks());
@@ -141,6 +142,7 @@ public class GameplayManager : MonoBehaviour
     /// <returns></returns>
     private IEnumerator SpawnEnemy(int count)
     {
+        inBattle = true;
         currentEnemies = new List<Enemy>();
         for (int i = 0; i < count; i++)
         {
@@ -177,6 +179,7 @@ public class GameplayManager : MonoBehaviour
         if (currentEnemies.Count == 0)
         {
             //
+            inBattle = false;
             Debug.Log("Wave cleared");
             Victory();
         }
@@ -230,9 +233,10 @@ public class GameplayManager : MonoBehaviour
     private void Victory()
     {
         GameplayUI.Instance.DisplayBattleWinUI();
-        foreach (var block in currentBlock)
+        for (int i = currentBlock.Count - 1; i >= 0; i--)
         {
-            currentBlock.Remove(block);
+            var block = currentBlock[i];
+            currentBlock.RemoveAt(i);
             Destroy(block.gameObject);
         }
 
@@ -258,7 +262,7 @@ public class GameplayManager : MonoBehaviour
 
     public void RemoveBlock(Block block)
     {
-        
+
     }
     #endregion
 }
