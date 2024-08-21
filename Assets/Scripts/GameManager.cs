@@ -29,10 +29,10 @@ public class GameManager : MonoBehaviour
     [SerializeField] private ShapeListSO ezPack;
     [SerializeField] private ShapeListSO normalPack;
     [SerializeField] private ShapeListSO hardPack;
-    [SerializeField] private List<Block> spawnableBlock;
+    [SerializeField] private List<Shape> spawnableBlock;
     [SerializeField] private List<Sprite> randomSprite;
     [SerializeField] private List<Transform> blockPosition;
-    [SerializeField] private List<Block> currentBlock;
+    [SerializeField] private List<Shape> currentBlock;
     [SerializeField] private bool ispause;
 
     [Header("UI")] 
@@ -122,10 +122,10 @@ public class GameManager : MonoBehaviour
     //
     //<SUMMARY> check if can put the shape on to the board, unpacking the object, clear line, calculate score, check game over after movement
     //
-    public void CheckAddToGrid(Block block)
+    public void CheckAddToGrid(Shape shape)
     {
         // check if can be put on position
-        foreach (var children in block.visual)
+        foreach (var children in shape._childBlock)
         {
             //get children position
             int roundedX = Mathf.RoundToInt(children.transform.position.x);
@@ -134,14 +134,14 @@ public class GameManager : MonoBehaviour
             if (InBounds(roundedX, roundedY) == false || dataGrid[roundedX, roundedY] == 1)
             {
                 ClearHighLight();
-                block.ReturnOriginalSize();
-                Tween.LocalPosition(block.transform, Vector2.zero, 0.4f, Ease.OutQuart);
+                shape.ReturnOriginalSize();
+                Tween.LocalPosition(shape.transform, Vector2.zero, 0.4f, Ease.OutQuart);
                 return;
             }
         }
 
         // add to the board
-        foreach (var children in block.visual)
+        foreach (var children in shape._childBlock)
         {
             int roundedX = Mathf.RoundToInt(children.transform.position.x);
             int roundedY = Mathf.RoundToInt(children.transform.position.y);
@@ -155,15 +155,15 @@ public class GameManager : MonoBehaviour
 
         //un parent
         _au.PlayOneShot(placeSound);
-        Destroy(block.gameObject);
-        currentBlock.Remove(block);
+        Destroy(shape.gameObject);
+        currentBlock.Remove(shape);
         if (currentBlock.Count == 0)
         {
             SpawnNewBlocks();
         }
         ClearHighLight();
         //the flavor
-        CheckLineAndRow(block.transform.position);
+        CheckLineAndRow(shape.transform.position);
         //Debug.Log("Total empty space " + DFS.countIslands(dataGrid));
         StartCoroutine(CheckAfterUpdate());
     }
@@ -429,15 +429,15 @@ public class GameManager : MonoBehaviour
         for (int i = 0; i < 3; i++)
         {
             Sprite visual = randomSprite[Random.Range(0, randomSprite.Count)];
-            Block newBlock = Instantiate(spawnableBlock[Random.Range(0, spawnableBlock.Count)]);
-            newBlock.transform.parent = blockPosition[i];
-            newBlock.transform.localPosition = Vector3.zero;
-            for (int j = 0; j < newBlock.visual.Count; j++)
+            Shape newShape = Instantiate(spawnableBlock[Random.Range(0, spawnableBlock.Count)]);
+            newShape.transform.parent = blockPosition[i];
+            newShape.transform.localPosition = Vector3.zero;
+            for (int j = 0; j < newShape._childBlock.Count; j++)
             {
-                newBlock.visual[j].GetComponent<SpriteRenderer>().sprite = visual;
+                newShape._childBlock[j].GetComponent<SpriteRenderer>().sprite = visual;
             }
 
-            currentBlock.Add(newBlock);
+            currentBlock.Add(newShape);
         }
     }
 
@@ -476,7 +476,7 @@ public class GameManager : MonoBehaviour
         {
             Destroy(child.gameObject);
         }
-        currentBlock = new List<Block>();
+        currentBlock = new List<Shape>();
         foreach (var child in cubeGrid)
         {
             Destroy(child);

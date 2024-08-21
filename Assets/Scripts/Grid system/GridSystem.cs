@@ -20,7 +20,7 @@ public class GridSystem : MonoBehaviour
     public static int Col = 8;
     public static SpriteRenderer[,] Visualgrid;
     public static (SpriteRenderer, MaterialPropertyBlock)[,] HighlightGrid;
-    public static (GameObject, int)[,] DataGrid;
+    public static (Block, int)[,] DataGrid;
     private GameObject _gridContainer;
 
     private GameObject _highlightGridContainer;
@@ -45,7 +45,7 @@ public class GridSystem : MonoBehaviour
         Col = 9;
         Visualgrid = new SpriteRenderer[Col, Row];
         HighlightGrid = new (SpriteRenderer, MaterialPropertyBlock)[Col, Row];
-        DataGrid = new (GameObject, int)[Col, Row];
+        DataGrid = new (Block, int)[Col, Row];
 
         _gridContainer = new GameObject();
         _gridContainer.name = "Grid container";
@@ -143,10 +143,10 @@ public class GridSystem : MonoBehaviour
         DataGrid[x, y].Item2 = 0;
         Destroy(DataGrid[x, y].Item1);
     }
-    public void CheckAddToGrid(Block block)
+    public void CheckAddToGrid(Shape shape)
     {
         // check if can be put on position
-        foreach (var children in block.visual)
+        foreach (var children in shape._childBlock)
         {
             //get children position
             int roundedX = Mathf.RoundToInt(children.transform.position.x);
@@ -155,28 +155,28 @@ public class GridSystem : MonoBehaviour
             if (InBounds(roundedX, roundedY) == false || DataGrid[roundedX, roundedY].Item2 == 1)
             {
                 ClearHighLight();
-                block.ReturnOriginalSize();
-                Tween.LocalPosition(block.transform, Vector2.zero, 0.4f, Ease.OutQuart);
+                shape.ReturnOriginalSize();
+                Tween.LocalPosition(shape.transform, Vector2.zero, 0.4f, Ease.OutQuart);
                 return;
             }
         }
 
         // add to the board
-        foreach (var children in block.visual)
+        foreach (var children in shape._childBlock)
         {
             int roundedX = Mathf.RoundToInt(children.transform.position.x);
             int roundedY = Mathf.RoundToInt(children.transform.position.y);
             //add to board
             children.transform.parent = _gridContainer.transform;
-            DataGrid[roundedX, roundedY].Item1 = children.gameObject;
+            DataGrid[roundedX, roundedY].Item1 = children;
             DataGrid[roundedX, roundedY].Item2 = 1;
             children.transform.position = new Vector3(roundedX, roundedY);
             //UpdateScore(1);
         }
 
         //_au.PlayOneShot(placeSound);
-        GameplayManager.Instance.currentBlock.Remove(block);
-        Destroy(block.gameObject);
+        GameplayManager.Instance.currentBlock.Remove(shape);
+        Destroy(shape.gameObject);
         ClearHighLight();
         Observer.Instance.TriggerEvent(ObserverConstant.OnPlacingShape);
     }
@@ -357,7 +357,7 @@ public class GridSystem : MonoBehaviour
     /// <param name="index"></param>
     /// <param name="queue"></param>
     /// <param name="isColumn"></param>
-    void AddToQueue(int index, List<GameObject> queue, bool isColumn)
+    void AddToQueue(int index, List<Block> queue, bool isColumn)
     {
         if (isColumn)
         {

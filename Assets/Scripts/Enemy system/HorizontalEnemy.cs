@@ -27,7 +27,7 @@ public class HorizontalEnemy : Enemy
         Observer.Instance.TriggerEvent(ObserverConstant.OnStateChange, GameState.EnemyTurn);
         for (int i = 0; i < GridSystem.Col; i++)
         {
-            GameObject tempObject;
+            Block tempObject;
             int tempValue;
             tempObject = GridSystem.DataGrid[i, _firstrow].Item1;
             tempValue = GridSystem.DataGrid[i, _firstrow].Item2;

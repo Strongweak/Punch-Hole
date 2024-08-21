@@ -20,7 +20,7 @@ public class GameplayManager : MonoBehaviour
 
     [SerializeField] private ShapeListSO spawnableBlock;
     public int maxVisibleShape;
-    public List<Block> currentBlock;
+    public List<Shape> currentBlock;
     private int currentlife;
 
     #endregion
@@ -63,7 +63,7 @@ public class GameplayManager : MonoBehaviour
 
     private void Start()
     {
-        currentBlock = new List<Block>();
+        currentBlock = new List<Shape>();
         currentlife = _maxLife;
         StartCoroutine(SetupGameplay());
         Observer.Instance.AddObserver(ObserverConstant.OnPlacingShape, o =>
@@ -122,11 +122,12 @@ public class GameplayManager : MonoBehaviour
         {
             if (GameplayUI.Instance.worldSpaceTransforms[i].transform.childCount == 0)
             {
-                Block newBlock =
+                Shape newShape =
                     Instantiate(spawnableBlock.spawnableBlock[Random.Range(0, spawnableBlock.spawnableBlock.Count)]);
-                newBlock.transform.parent = GameplayUI.Instance.worldSpaceTransforms[i];
-                newBlock.transform.localPosition = Vector3.zero;
-                currentBlock.Add(newBlock);
+                newShape.transform.parent = GameplayUI.Instance.worldSpaceTransforms[i];
+                newShape.transform.localPosition = Vector3.zero;
+                newShape.SetupVisual();
+                currentBlock.Add(newShape);
             }
         }
 
@@ -260,7 +261,7 @@ public class GameplayManager : MonoBehaviour
         StartCoroutine(SpawnNewBlocks());
     }
 
-    public void RemoveBlock(Block block)
+    public void RemoveBlock(Shape shape)
     {
 
     }

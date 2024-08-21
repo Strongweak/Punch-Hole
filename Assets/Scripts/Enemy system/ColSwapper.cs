@@ -26,7 +26,7 @@ public class ColSwapper : Enemy
         Sequence shithead = Sequence.Create(cycles: 1, CycleMode.Yoyo);
         for (int i = 0; i < GridSystem.Row; i++)
         {
-            GameObject tempObject;
+            Block tempObject;
             int tempValue;
             tempObject = GridSystem.DataGrid[firstCol, i].Item1;
             tempValue = GridSystem.DataGrid[firstCol, i].Item2;

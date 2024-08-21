@@ -1,139 +1,67 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using PrimeTween;
-using Unity.VisualScripting;
-using UnityEditor;
 using UnityEngine;
-using UnityEngine.EventSystems;
-using UnityEngine.Serialization;
 
-public class Block : MonoBehaviour ,IPointerDownHandler, IPointerUpHandler,IDragHandler
+public class Block : MonoBehaviour
 {
-    public List<SpriteRenderer> visual;
-    public ShapeData _data;
-    public int[,] boardArray;
-    public AudioSource au;
-    [SerializeField] private AudioClip pickSound;
-    private const float skrink = 0.7f;
-    private Vector3 originalScale;
-    [SerializeField] private Sprite defaultSprite;
-    private Tween _currentTween;
-    private void OnEnable()
-    {
-        if (_data != null)
-        {
-            boardArray = new int[_data.row, _data.col];
-
-            for (int i = 0; i < _data.row; i++)
-            {
-                for (int j = 0; j < _data.col; j++)
-                {
-                    boardArray[i, j] = Convert.ToInt32(_data.board[i].col[j]);
-                }
-            }
-        }    
-    }
+    public EffectType _effectType;
+    private Material _mat;
+    private MaterialPropertyBlock _materialPropertyBlock = new MaterialPropertyBlock();
 
     private void Start()
     {
-        au = GetComponent<AudioSource>();
-        originalScale = transform.localScale;
-        transform.localScale = Vector3.zero;
-        Tween.Scale(transform,originalScale * skrink,0.2f,Ease.OutBack);
+        _mat = GetComponent<SpriteRenderer>().material;
+    }
+    public void SetupEffectVisual()
+    {
+        switch (_effectType)
+        {
+            case EffectType.Normal:
+                break;
+            case EffectType.Bomb:
+                break;
+            case EffectType.Cross:
+                break;
+            case EffectType.Seeker:
+                break;
+            case EffectType.Rock:
+                break;
+            case EffectType.Weight:
+                break;
+            case EffectType.Weakpoint:
+                break;
+            case EffectType.Double:
+                break;
+            case EffectType.Bonus:
+                break;
+            default:
+                //normal effect
+                break;
+        }
+    }
+}
 
-    }
-#if UNITY_EDITOR
-    private void OnValidate()
-    {
-        visual = transform.GetComponentsInChildren<SpriteRenderer>().ToList();
-        foreach (var child in visual)
-        {
-            if (child.GetComponent<BoxCollider2D>() == null)
-            {
-                child.AddComponent<BoxCollider2D>();
-            }
-
-            if (defaultSprite != null)
-            {
-                child.sprite = defaultSprite;
-            }
-        }
-    }
-#endif
-
-    private Vector2 offset;
-    public void OnPointerDown(PointerEventData eventData)
-    {
-        if (GameplayManager.Instance._state != GameState.PlayerTurn)
-        {
-            return;
-        }
-        au.PlayOneShot(pickSound);
-        Tween.StopAll(onTarget: this);
-        Tween.Scale(transform,originalScale,0.2f,Ease.OutExpo);
-        //Debug.Log("Hold");
-        Vector2 position = Camera.main.ScreenToWorldPoint(eventData.position);
-        offset = position - (Vector2)transform.position + Vector2.up * 3f;
-        //Tween.Position(transform,position,0.2f,Ease.OutExpo);
-    }
-    
-    //<TODO> check if can be placed , destroy the parent, release the child to the grid, if not return to the old position
-    public void OnPointerUp(PointerEventData eventData)
-    {
-        if (GameplayManager.Instance._state != GameState.PlayerTurn)
-        {
-            return;
-        }
-        //GameManager.instance.CheckAddToGrid(this);
-        GridSystem.Instance.CheckAddToGrid(this);
-        //ReturnOriginalSize();
-        GridSystem.Instance.ClearHighLight();
-    }
-
-    public void ReturnOriginalSize()
-    {
-        Tween.Scale(transform,originalScale * skrink,0.2f,Ease.OutExpo);
-    }
-    public void OnDrag(PointerEventData eventData)
-    {
-        if (GameplayManager.Instance._state != GameState.PlayerTurn)
-        {
-            return;
-        }
-        GridSystem.Instance.ClearHighLight();
-        Vector2 position = Camera.main.ScreenToWorldPoint(eventData.position);
-        transform.position = position - offset + Vector2.up * 3f;
-        foreach (var child in visual)
-        {
-            //GameManager.instance.HighLightCloset(child.transform);
-            GridSystem.Instance.HighLightCloset(child.transform);
-        }
-    }
-#if UNITY_EDITOR
-    private void OnDrawGizmos()
-    {
-
-        foreach (var child in visual)
-        {
-            int roundedX = Mathf.RoundToInt(child.transform.position.x);
-            int roundedY = Mathf.RoundToInt(child.transform.position.y);
-            Handles.Label(child.transform.position, "[" + roundedX+ "," + roundedY +"]");
-        }
-        GUIStyle style = new GUIStyle();
-        style.normal.textColor = Color.red;
-        style.fontSize = 30;
-        // if (_data != null)
-        // {
-        //     for (int i = 0; i < boardArray.GetLength(0); i++)
-        //     {
-        //         for (int j = 0; j < boardArray.GetLength(1); j++)
-        //         {
-        //             Handles.Label(transform.position + new Vector3(i,j), Convert.ToInt32(boardArray[i,j]) + "", style);
-        //         }
-        //     }
-        // }
-    } 
-#endif
+/// <summary>
+/// Normal: duh
+/// Bomb: explode and destroy 8 neighbour cells
+/// Cross: destroy perpendicular line
+/// Seeker: cell being clear and find the line having fewest empty space and move there, cause chain reaction
+/// Rock: Must be clear 2 times
+/// Weight: Gradually move along gravity, destroy the next cell (for boss)
+/// Weakpoint: Enemies weak point, x2 damage when cleared (can be use for Fly, Moth...)
+/// Double: x2 damage when cleared
+/// Bonus: Score bonus
+/// </summary>
+public enum EffectType
+{
+    Normal,
+    Bomb,
+    Cross,
+    Seeker,
+    Rock,
+    Weight,
+    Weakpoint,
+    Double,
+    Bonus,
 }
