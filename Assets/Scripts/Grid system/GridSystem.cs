@@ -24,7 +24,7 @@ public class GridSystem : MonoBehaviour
     private GameObject _gridContainer;
 
     private GameObject _highlightGridContainer;
-//need to rework this
+    //need to rework this
     [SerializeField] private Color ghostColor;
     [SerializeField] private Color normalColor;
     [SerializeField] private Color gridColor;
@@ -54,7 +54,7 @@ public class GridSystem : MonoBehaviour
         _highlightGridContainer = new GameObject();
         _highlightGridContainer.name = "highlight container";
         _highlightGridContainer.AddComponent<SortingGroup>().sortingOrder = -1;
-        
+
         for (int i = 0; i < Col; i++)
         {
             for (int j = 0; j < Row; j++)
@@ -95,7 +95,7 @@ public class GridSystem : MonoBehaviour
         cam.orthographicSize = Mathf.Max(horizontal, vertical) * 0.5f;
         cam.transform.position = bounds.center + new Vector3(0, 0, -10) + (Vector3)offset;
     }
-    
+
     public void GenerateGrid(int x, int y)
     {
         if (_gridContainer != null)
@@ -137,11 +137,13 @@ public class GridSystem : MonoBehaviour
         cam.transform.position = bounds.center + new Vector3(0, 0, -10) + (Vector3)offset;
 
     }
-    
+
     public void ClearCell(int x, int y)
     {
         DataGrid[x, y].Item2 = 0;
-        Destroy(DataGrid[x, y].Item1);
+        //Destroy(DataGrid[x, y].Item1.gameObject);
+        DataGrid[x, y].Item1?.gameObject.SetActive(false);
+        DataGrid[x, y].Item1 = null;
     }
     public void CheckAddToGrid(Shape shape)
     {
@@ -252,9 +254,8 @@ public class GridSystem : MonoBehaviour
             {
                 for (int j = 0; j < Col; j++)
                 {
-                    DataGrid[j, i].Item2 = 0;
+                    ClearCell(j, i);
                     totalDamage += GameplayManager.Instance.plusScore + (GameplayManager.Instance.currentStreak * 10);
-                    Destroy(DataGrid[j, i].Item1);
                 }
 
                 lineClear++;
@@ -268,9 +269,8 @@ public class GridSystem : MonoBehaviour
             {
                 for (int j = 0; j < Row; j++)
                 {
-                    DataGrid[i, j].Item2 = 0;
+                    ClearCell(i,j);
                     totalDamage += GameplayManager.Instance.plusScore + (GameplayManager.Instance.currentStreak * 10);
-                    Destroy(DataGrid[i, j].Item1);
                 }
 
                 lineClear++;
@@ -513,8 +513,7 @@ public class GridSystem : MonoBehaviour
         {
             for (int j = 0; j < Row; j++)
             {
-                DataGrid[i, j].Item2 = 0;
-                Destroy(DataGrid[i, j].Item1);
+                ClearCell(i,j);
                 yield return new WaitForSeconds(GameplayManager._gameplaySpeed / 10f);
             }
         }

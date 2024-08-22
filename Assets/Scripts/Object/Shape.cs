@@ -45,6 +45,7 @@ public class Shape : MonoBehaviour ,IPointerDownHandler, IPointerUpHandler,IDrag
 
     public void SetupVisual()
     {
+        _childBlock = new List<Block>();
         if (_data != null)
         {
             for (int i = 0; i < _data.row; i++)

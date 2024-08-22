@@ -7,8 +7,11 @@ public class Block : MonoBehaviour
 {
     public EffectType _effectType;
     private Material _mat;
-    private MaterialPropertyBlock _materialPropertyBlock = new MaterialPropertyBlock();
-
+    private MaterialPropertyBlock _materialPropertyBlock;
+    private void Awake()
+    {
+        _materialPropertyBlock = new MaterialPropertyBlock();
+    }
     private void Start()
     {
         _mat = GetComponent<SpriteRenderer>().material;
@@ -64,4 +67,8 @@ public enum EffectType
     Weakpoint,
     Double,
     Bonus,
+}
+
+public enum Attribute{
+    
 }
