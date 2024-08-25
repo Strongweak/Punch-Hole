@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using PrimeTween;
+using TMPro;
 using UnityEngine;
 
 public class GameplayUI : MonoBehaviour
@@ -20,6 +21,9 @@ public class GameplayUI : MonoBehaviour
     [SerializeField] private List<Transform> displayTransforms;
     public List<Transform> worldSpaceTransforms;
 
+    [Header("Score and life counter")] 
+    [SerializeField] private TextMeshProUGUI _txtLifeCounter;
+    [SerializeField] private TextMeshProUGUI _txtScoreCounter;
     [Space(10f)] 
     [Header("UI")] 
     public static int screenWidth = Screen.width;
@@ -123,5 +127,15 @@ public class GameplayUI : MonoBehaviour
 
         _infoUI.gameObject.SetActive(true);
         _infoUI.FeedData(data);
+    }
+
+    public void UpdateScore(int value)
+    {
+        _txtScoreCounter.SetText(value.ToString("D6"));
+    }
+
+    public void UpdateLife(int value)
+    {
+        _txtLifeCounter.SetText($"X {value.ToString()}");
     }
 }

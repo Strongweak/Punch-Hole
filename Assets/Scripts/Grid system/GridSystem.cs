@@ -518,6 +518,7 @@ public class GridSystem : MonoBehaviour
             }
         }
 
+        GameplayManager.Instance.LoseLife();
         Observer.Instance.TriggerEvent(ObserverConstant.OnStateChange, GameState.PlayerTurn);
     }
 #if UNITY_EDITOR

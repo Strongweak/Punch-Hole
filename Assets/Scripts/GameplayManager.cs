@@ -17,12 +17,12 @@ public class GameplayManager : MonoBehaviour
     [Header("Player stat")]
     [SerializeField]
     private int _maxLife;
-
+    
     [SerializeField] private ShapeListSO spawnableBlock;
     public int maxVisibleShape;
     public List<Shape> currentBlock;
-    private int currentlife;
-
+    [SerializeField] private int _currentlife;
+    [SerializeField] private int _currentScore;
     #endregion
 
     #region Enemy stat
@@ -64,7 +64,7 @@ public class GameplayManager : MonoBehaviour
     private void Start()
     {
         currentBlock = new List<Shape>();
-        currentlife = _maxLife;
+        _currentlife = _maxLife;
         StartCoroutine(SetupGameplay());
         Observer.Instance.AddObserver(ObserverConstant.OnPlacingShape, o =>
         {
@@ -244,8 +244,24 @@ public class GameplayManager : MonoBehaviour
         StartCoroutine(GridSystem.Instance.ClearBoard());
     }
 
+    public void LoseLife()
+    {
+        if (_currentlife <= 0)
+        {
+            GameplayUI.Instance.DisplayLoseUI();
+        }
+        else
+        {
+            _currentlife--;
+            GameplayUI.Instance.UpdateLife(_currentlife);
+        }
+    }
     private IEnumerator SetupGameplay()
     {
+        _currentlife = 3;
+        _currentScore = 0;
+        GameplayUI.Instance.UpdateLife(_currentlife);
+        GameplayUI.Instance.UpdateScore(_currentScore);
         //Generate grid
         yield return StartCoroutine(GridSystem.Instance.GenerateGrid());
         //create world position of ui for the block to spawn
