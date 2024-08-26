@@ -1,6 +1,9 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Burst;
+using Unity.Collections;
+using Unity.Jobs;
 using UnityEngine;
 
 public class Block : MonoBehaviour
@@ -41,6 +44,18 @@ public class Block : MonoBehaviour
             default:
                 //normal effect
                 break;
+        }
+    }
+
+    [BurstCompile]
+    struct Move : IJob
+    {
+        public NativeArray<float> Input;
+        public NativeArray<float> Output;
+
+        public void Execute()
+        {
+            
         }
     }
 }

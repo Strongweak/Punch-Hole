@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using PrimeTween;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class GameplayUI : MonoBehaviour
 {
@@ -14,7 +15,7 @@ public class GameplayUI : MonoBehaviour
     [SerializeField] private Transform _enemyVisualContainer;
     #region UI
 
-    [SerializeField] private RectTransform mainCanvas;
+    public RectTransform _mainCanvas;
     [Header("Visual and block")]
     [SerializeField] private Transform shapeContainer;
     [SerializeField] private Transform positionTemplate;
@@ -47,6 +48,11 @@ public class GameplayUI : MonoBehaviour
         Observer.Instance.AddObserver(ObserverConstant.OnDisplayEnemyInfo, o => ShowInfo(o));
     }
 
+    public void SetupScreenSize()
+    {
+        _mainCanvas.sizeDelta = new Vector2(screenWidth,screenHeight);
+
+    }
     public void SpawnEnemyVisualForEnemy(Enemy parent)
     {
         EnemyVisual newVisual = Instantiate(_enemyVisualPrefab, _enemyVisualContainer, false);
@@ -71,23 +77,23 @@ public class GameplayUI : MonoBehaviour
         {
             Vector3 worldPos;
             Vector3 screenPosition = RectTransformUtility.WorldToScreenPoint(GameplayManager.Instance.cam, displayTransforms[i].position);
-            RectTransformUtility.ScreenPointToWorldPointInRectangle(mainCanvas, screenPosition, GameplayManager.Instance.cam, out worldPos);
+            RectTransformUtility.ScreenPointToWorldPointInRectangle(_mainCanvas, screenPosition, GameplayManager.Instance.cam, out worldPos);
             worldPos.z = 0;
             worldSpaceTransforms[i].transform.position = worldPos;
         }
     }
-
+    
     /// <summary>
     /// Setup first time playing UI
     /// </summary>
     public void SetupUI()
     {
         //
-        _battleWonUI.anchoredPosition = new Vector2(0, -mainCanvas.rect.height);
-        _winUI.anchoredPosition = new Vector2(0, -mainCanvas.rect.height);
+        _battleWonUI.anchoredPosition = new Vector2(0, -_mainCanvas.rect.height);
+        _winUI.anchoredPosition = new Vector2(0, -_mainCanvas.rect.height);
         //
-        _loseUI.anchoredPosition = new Vector2(mainCanvas.rect.width, 0);
-        _confirmUI.anchoredPosition = new Vector2(mainCanvas.rect.height, 0);
+        _loseUI.anchoredPosition = new Vector2(_mainCanvas.rect.width, 0);
+        _confirmUI.anchoredPosition = new Vector2(_mainCanvas.rect.height, 0);
         //
         //battleWonUI.gameObject.SetActive(false);
         //winUI.gameObject.SetActive(false);
@@ -100,7 +106,7 @@ public class GameplayUI : MonoBehaviour
         _battleWonUI.gameObject.SetActive(isOn);
         if (isOn)
         {
-            _battleWonUI.anchoredPosition = new Vector2(0, -mainCanvas.rect.height);
+            _battleWonUI.anchoredPosition = new Vector2(0, -_mainCanvas.rect.height);
         }
         else
         {
@@ -112,7 +118,7 @@ public class GameplayUI : MonoBehaviour
     public void DisplayLoseUI()
     {
         _loseUI.gameObject.SetActive(true);
-        _loseUI.anchoredPosition = new Vector2(mainCanvas.rect.height, 0);
+        _loseUI.anchoredPosition = new Vector2(_mainCanvas.rect.height, 0);
         Tween.UIAnchoredPosition(_loseUI, Vector3.zero, 0.3f);
     }
 

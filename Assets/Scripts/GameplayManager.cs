@@ -108,7 +108,9 @@ public class GameplayManager : MonoBehaviour
 
     public void ShakeCamera(float strength, float duration, float frequency)
     {
-        Tween.ShakeCamera(cam, strength, duration, frequency);
+        var orthoPosStrength = strength * cam.orthographicSize * 0.03f;
+        Tween.ShakeLocalPosition(cam.transform,
+            new ShakeSettings(new Vector3(orthoPosStrength, orthoPosStrength), duration, frequency));
     }
 
     /// <summary>

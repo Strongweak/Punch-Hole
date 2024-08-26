@@ -41,6 +41,7 @@ public class GridSystem : MonoBehaviour
             Destroy(_gridContainer);
         }
 
+        GameplayUI.Instance._mainCanvas.GetComponent<Canvas>().renderMode = RenderMode.ScreenSpaceCamera;
         Row = 9;
         Col = 9;
         Visualgrid = new SpriteRenderer[Col, Row];
@@ -94,6 +95,10 @@ public class GridSystem : MonoBehaviour
 
         cam.orthographicSize = Mathf.Max(horizontal, vertical) * 0.5f;
         cam.transform.position = bounds.center + new Vector3(0, 0, -10) + (Vector3)offset;
+        yield return null;
+        GameplayUI.Instance._mainCanvas.GetComponent<Canvas>().renderMode = RenderMode.WorldSpace;
+        GameplayUI.Instance.transform.position = bounds.center + (Vector3)offset;
+
     }
 
     public void GenerateGrid(int x, int y)
