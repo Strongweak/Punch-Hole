@@ -127,10 +127,9 @@ public class GameplayUI : MonoBehaviour
         EnemySO data = (EnemySO)o;
         if (data == null)
         {
-            _infoUI.gameObject.SetActive(false);
+            _infoUI.Hide();
             return;
         }
-
         _infoUI.gameObject.SetActive(true);
         _infoUI.FeedData(data);
     }

@@ -1,61 +1,39 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
-using DG.Tweening;
+using PrimeTween;
 using TMPro;
 using UnityEngine;
 
-public class PopupTextAnimatiob : MonoBehaviour
+public class PopupTextAnimation : MonoBehaviour
 {
     public TMP_Text textComponent;
-    private Sequence sequence;
+    private Sequence currentSequence;
     public float delayBetweenText;
     public float characterAnimSpeed;
+
     public AnimationCurve curve;
+
     // Start is called before the first frame update
     void Start()
     {
-
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.F))
-        {
-            PopupAnimation();
-        }
-        // var textInfo = textComponent.textInfo;
-        // for (int i = 0; i < textInfo.characterCount; i++)
+        // if (Input.GetKeyDown(KeyCode.F))
         // {
-        //     var charInfo = textInfo.characterInfo[i];
-
-        //     if (!charInfo.isVisible)
-        //     {
-        //         continue;
-        //     }
-        //     var verts = textInfo.meshInfo[charInfo.materialReferenceIndex].vertices;
-
-
-        //     for (int j = 0; j < 4; ++j)
-        //     {
-        //         var orig = verts[charInfo.vertexIndex + j];
-        //         verts[charInfo.vertexIndex + j] = orig + new Vector3(0, Mathf.Sin(Time.time * 2f + orig.x * 0.01f) * 10f, 0);
-
-        //     }
-        // }
-        // for (int i = 0; i < textInfo.meshInfo.Length; ++i)
-        // {
-
-        //     var meshInfo = textInfo.meshInfo[i];
-        //     meshInfo.mesh.vertices = meshInfo.vertices;
-        //     textComponent.UpdateGeometry(meshInfo.mesh, i);
-
+        //     PopupAnimation();
         // }
     }
 
     void PopupAnimation()
     {
-        Sequence sequence = DOTween.Sequence();
+        currentSequence.Complete();
+        textComponent.UpdateVertexData(TMP_VertexDataUpdateFlags.Vertices);
+
+        currentSequence = Sequence.Create(cycles: 1, CycleMode.Yoyo);
         Debug.Log("Animation is running");
         var textInfo = textComponent.textInfo;
         // Loop through each character in the text
@@ -81,15 +59,11 @@ public class PopupTextAnimatiob : MonoBehaviour
             for (int j = 0; j < 4; j++)
             {
                 verts[vertexIndex + j] = charInfo.bottomLeft; // Set all vertices to the bottom left position
+                textComponent.UpdateVertexData(TMP_VertexDataUpdateFlags.Vertices);
             }
 
-            textComponent.UpdateVertexData(TMP_VertexDataUpdateFlags.Vertices);
 
-            // Create a local variable to keep track of which character's vertices are being animated
-            int index = i;
-
-            // Add the scaling animation to the sequence
-            sequence.Insert(i * delayBetweenText,DOTween.To(() => 0f, x =>
+            Tween floatTween = Tween.Custom(0f, 1f, characterAnimSpeed, x =>
             {
                 float scale = x;
 
@@ -99,12 +73,15 @@ public class PopupTextAnimatiob : MonoBehaviour
                 }
 
                 textComponent.UpdateVertexData(TMP_VertexDataUpdateFlags.Vertices);
+            }, curve);
+            // Add the scaling animation to the sequence
+            currentSequence.Insert(atTime: i * delayBetweenText, floatTween);
 
-            }, 1f, characterAnimSpeed).SetEase(Ease.OutBack));
+            #region DOTween
 
             // Animate back to normal size
             // float elapsedTime = 0f;
-            
+
             // while (elapsedTime < characterAnimSpeed)
             // {
             //     elapsedTime += Time.deltaTime;
@@ -128,7 +105,16 @@ public class PopupTextAnimatiob : MonoBehaviour
             // textComponent.UpdateVertexData(TMP_VertexDataUpdateFlags.Vertices);
 
             //yield return new WaitForSeconds(delayBetweenText); // Delay between each character animation
+
+            #endregion
         }
+
         Debug.Log("Animation is end");
+    }
+
+    private void OnDisable()
+    {
+        currentSequence.Complete();
+        textComponent.UpdateVertexData(TMP_VertexDataUpdateFlags.Vertices);
     }
 }

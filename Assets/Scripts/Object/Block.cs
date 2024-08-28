@@ -11,6 +11,17 @@ public class Block : MonoBehaviour
     public EffectType _effectType;
     private Material _mat;
     private MaterialPropertyBlock _materialPropertyBlock;
+    
+    [Header("Custom physic")]
+    [Header("Physic")]
+    [SerializeField] private float _gravity;
+    [SerializeField] private float _capFallVelocity = 60f;
+    [SerializeField] private float _drag = 0.1f;
+    [Header("Angular")]
+    [SerializeField] private float _AngularDrag = 0.1f;
+    public bool _isStatic;
+    private Vector2 velocity;
+    private Vector3 angularVel;
     private void Awake()
     {
         _materialPropertyBlock = new MaterialPropertyBlock();
@@ -47,15 +58,43 @@ public class Block : MonoBehaviour
         }
     }
 
-    [BurstCompile]
-    struct Move : IJob
+    private void Update()
     {
-        public NativeArray<float> Input;
-        public NativeArray<float> Output;
-
-        public void Execute()
+        if (_isStatic)
         {
-            
+            velocity = Vector2.zero;
+            angularVel = Vector3.zero;
+            return;
+        }
+        velocity.y += _gravity * Time.deltaTime;
+        velocity.y = Mathf.Clamp(velocity.y, -_capFallVelocity, _capFallVelocity);
+        transform.Translate(velocity * Time.deltaTime);
+        transform.Rotate(angularVel * Time.deltaTime);
+        velocity  *= 1 - Time.deltaTime * _drag;
+        angularVel *= 1 - Time.deltaTime * _AngularDrag;
+    }
+
+    public void AddForce(Vector2 direction)
+    {
+        velocity += direction;
+    }
+
+    public void AddTorque(Vector3 direction)
+    {
+        angularVel += direction;
+    }
+    private void OnDisable()
+    {
+        _isStatic = true;
+        velocity = Vector2.zero;
+        angularVel = Vector3.zero;
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.CompareTag("Bound"))
+        {
+            gameObject.SetActive(false);
         }
     }
 }

@@ -144,3 +144,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _effectType: 0
+  _gravity: -19.62
+  _capFallVelocity: 60
+  _drag: 0.1
+  _isStatic: 1

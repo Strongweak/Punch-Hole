@@ -7,6 +7,7 @@ using UnityEditor;
 #endif
 using UnityEngine;
 using UnityEngine.Rendering;
+using Random = UnityEngine.Random;
 
 public class GridSystem : MonoBehaviour
 {
@@ -147,7 +148,12 @@ public class GridSystem : MonoBehaviour
     {
         DataGrid[x, y].Item2 = 0;
         //Destroy(DataGrid[x, y].Item1.gameObject);
-        DataGrid[x, y].Item1?.gameObject.SetActive(false);
+        if (DataGrid[x, y].Item1 != null)
+        {
+            DataGrid[x, y].Item1._isStatic = false;
+            DataGrid[x, y].Item1.AddTorque(new Vector3(0,0, Random.Range(5f,10f)));
+            DataGrid[x, y].Item1.AddForce(new Vector2(Random.Range(-15f, 15f), Random.Range(5f,10f)));
+        }
         DataGrid[x, y].Item1 = null;
     }
     public void CheckAddToGrid(Shape shape)
