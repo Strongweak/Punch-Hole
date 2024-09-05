@@ -10,7 +10,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2015417760376299269, guid: d14a1bbd3eefb874f9d8bc68e462818a, type: 3}
       propertyPath: m_Name
-      value: Moth
+      value: Row swapper
       objectReference: {fileID: 0}
     - target: {fileID: 3735310098215821864, guid: d14a1bbd3eefb874f9d8bc68e462818a, type: 3}
       propertyPath: m_Pivot.x
@@ -99,7 +99,7 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 2015417760376299269, guid: d14a1bbd3eefb874f9d8bc68e462818a, type: 3}
       insertIndex: -1
-      addedObject: {fileID: -8305417948805882303}
+      addedObject: {fileID: -2216237477841791663}
   m_SourcePrefab: {fileID: 100100000, guid: d14a1bbd3eefb874f9d8bc68e462818a, type: 3}
 --- !u!114 &2991809383060234023 stripped
 MonoBehaviour:
@@ -117,7 +117,7 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 2015417760376299269, guid: d14a1bbd3eefb874f9d8bc68e462818a, type: 3}
   m_PrefabInstance: {fileID: 3102306356997528792}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &-8305417948805882303
+--- !u!114 &-2216237477841791663
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -126,10 +126,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 3527911664214606813}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 848c8c3426f3b64459caae894672bce4, type: 3}
+  m_Script: {fileID: 11500000, guid: 8dd9b2d17efd6a444b4cfa3b2eaa5ebe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  enemyData: {fileID: 11400000, guid: fcd148e37b8182448809f0bfb0bf9b45, type: 2}
+  enemyData: {fileID: 11400000, guid: 079b327743df0e64fb14590dcf9dc1f1, type: 2}
   maxHealth: 0
   _delayAfterMove: 0
   _currentHealth: 0
@@ -138,12 +138,9 @@ MonoBehaviour:
   healthbarShader: {fileID: 2991809383060234023}
   enemyVisual: {fileID: 0}
   numberText: {fileID: 8317339530701516070}
-  _currentCol: 0
-  _currentRow: 0
-  moveStep: 0
-  _telegraphMat: {fileID: 2100000, guid: 25d99fc58d0bf6146bea3306619d9a01, type: 2}
-  _mothMat: {fileID: -876546973899608171, guid: 1e8948ceeb0e00549a17929b2cb03563, type: 3}
-  direction: 0
+  _firstrow: 0
+  _secRow: 0
+  warningMaterial: {fileID: 2100000, guid: 8aa3bfed19e374e42a47a70ff6439644, type: 2}
 --- !u!114 &8317339530701516070 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 6368295539800355326, guid: d14a1bbd3eefb874f9d8bc68e462818a, type: 3}

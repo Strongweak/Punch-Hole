@@ -61,8 +61,7 @@ public class GameplayManager : MonoBehaviour
         Instance = this;
     }
 
-    private void Start()
-    {
+    public void StartGame(){
         currentBlock = new List<Shape>();
         _currentlife = _maxLife;
         StartCoroutine(SetupGameplay());
@@ -75,8 +74,8 @@ public class GameplayManager : MonoBehaviour
         ChangeState(GameState.PlayerTurn);
         GameplayUI.Instance.SetupUI();
         StartCoroutine(SpawnEnemy(maxNumberOfEnemies));
-    }
 
+    }
     /// <summary>
     /// The main gameplay flow must be manage here, trigger after shape put on board
     /// player turn => [placing block] => player does effect(damage, line clear...) => check enemy health
