@@ -35,6 +35,7 @@ public class GridSystem : MonoBehaviour
         Instance = this;
     }
 
+    #region Grid Maker
     public IEnumerator GenerateGrid()
     {
         if (_gridContainer != null)
@@ -50,11 +51,15 @@ public class GridSystem : MonoBehaviour
         DataGrid = new (Block, int)[Col, Row];
 
         _gridContainer = new GameObject();
+#if UNITY_EDITOR
         _gridContainer.name = "Grid container";
+#endif
         _gridContainer.AddComponent<SortingGroup>().sortingOrder = -2;
 
         _highlightGridContainer = new GameObject();
+#if UNITY_EDITOR
         _highlightGridContainer.name = "highlight container";
+#endif
         _highlightGridContainer.AddComponent<SortingGroup>().sortingOrder = -1;
 
         for (int i = 0; i < Col; i++)
@@ -94,39 +99,68 @@ public class GridSystem : MonoBehaviour
         var vertical = bounds.size.y;
         var horizontal = bounds.size.x * cam.pixelHeight / cam.pixelWidth;
 
-        cam.orthographicSize = Mathf.Max(horizontal, vertical) * 0.5f;
-        cam.transform.position = bounds.center + new Vector3(0, 0, -10) + (Vector3)offset;
-        yield return null;
+        Sequence zoom = Tween.Position(cam.transform, bounds.center + new Vector3(0, 0, -10) + (Vector3)offset, GameplayManager._gameplaySpeed)
+        .Group(Tween.Position(GameplayUI.Instance.transform, bounds.center + (Vector3)offset, GameplayManager._gameplaySpeed))
+        .Group(Tween.CameraOrthographicSize(cam, cam.orthographicSize, Mathf.Max(horizontal, vertical) * 0.5f, GameplayManager._gameplaySpeed));
+        //cam.orthographicSize = Mathf.Max(horizontal, vertical) * 0.5f;
+        //cam.transform.position = bounds.center + new Vector3(0, 0, -10) + (Vector3)offset;
+        yield return zoom.ToYieldInstruction();
         GameplayUI.Instance._mainCanvas.GetComponent<Canvas>().renderMode = RenderMode.WorldSpace;
-        GameplayUI.Instance.transform.position = bounds.center + (Vector3)offset;
+        //GameplayUI.Instance.transform.position = bounds.center + (Vector3)offset;
 
     }
 
-    public void GenerateGrid(int x, int y)
+    public IEnumerator GenerateGrid(int x, int y)
     {
         if (_gridContainer != null)
         {
             Destroy(_gridContainer);
         }
 
-        Row = y;
-        Col = x;
+        GameplayUI.Instance._mainCanvas.GetComponent<Canvas>().renderMode = RenderMode.ScreenSpaceCamera;
+        Row = x;
+        Col = y;
         Visualgrid = new SpriteRenderer[Col, Row];
+        HighlightGrid = new (SpriteRenderer, MaterialPropertyBlock)[Col, Row];
+        DataGrid = new (Block, int)[Col, Row];
+
         _gridContainer = new GameObject();
-        //bool flip = false;
+#if UNITY_EDITOR
+        _gridContainer.name = "Grid container";
+#endif
+        _gridContainer.AddComponent<SortingGroup>().sortingOrder = -2;
+
+        _highlightGridContainer = new GameObject();
+#if UNITY_EDITOR
+        _highlightGridContainer.name = "highlight container";
+#endif
+        _highlightGridContainer.AddComponent<SortingGroup>().sortingOrder = -1;
+
         for (int i = 0; i < Col; i++)
         {
-            //flip = !flip;
             for (int j = 0; j < Row; j++)
             {
+                //grid
                 GameObject grid = Instantiate(cell);
                 grid.transform.parent = _gridContainer.transform;
                 grid.transform.position = new Vector2(i, j);
-                //flip = !flip;
-                grid.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0);
+                grid.GetComponent<SpriteRenderer>().color = gridColor;
                 Visualgrid[i, j] = grid.GetComponent<SpriteRenderer>();
+
+                //highlight
+                GameObject high = Instantiate(respondCell);
+                high.transform.parent = _highlightGridContainer.transform;
+                high.transform.position = new Vector2(i, j);
+                // Create a new MaterialPropertyBlock
+                MaterialPropertyBlock propertyBlock = new MaterialPropertyBlock();
+                propertyBlock.SetColor("_Color", normalColor);
+                high.GetComponent<SpriteRenderer>().SetPropertyBlock(propertyBlock);
+                HighlightGrid[i, j].Item1 = high.GetComponent<SpriteRenderer>();
+                HighlightGrid[i, j].Item2 = propertyBlock;
             }
         }
+
+        yield return new WaitForEndOfFrame();
         //Adjust camera to fit the board
         var bounds = new Bounds();
         foreach (var col in Visualgrid)
@@ -139,23 +173,70 @@ public class GridSystem : MonoBehaviour
         var vertical = bounds.size.y;
         var horizontal = bounds.size.x * cam.pixelHeight / cam.pixelWidth;
 
-        cam.orthographicSize = Mathf.Max(horizontal, vertical) * 0.5f;
-        cam.transform.position = bounds.center + new Vector3(0, 0, -10) + (Vector3)offset;
+        Sequence zoom = Tween.Position(cam.transform, bounds.center + new Vector3(0, 0, -10) + (Vector3)offset, GameplayManager._gameplaySpeed)
+        .Group(Tween.Position(GameplayUI.Instance.transform, bounds.center + (Vector3)offset, GameplayManager._gameplaySpeed))
+        .Group(Tween.CameraOrthographicSize(cam, cam.orthographicSize, Mathf.Max(horizontal, vertical) * 0.5f, GameplayManager._gameplaySpeed));
+        //cam.orthographicSize = Mathf.Max(horizontal, vertical) * 0.5f;
+        //cam.transform.position = bounds.center + new Vector3(0, 0, -10) + (Vector3)offset;
+        yield return zoom.ToYieldInstruction();
+        GameplayUI.Instance._mainCanvas.GetComponent<Canvas>().renderMode = RenderMode.WorldSpace;
+        //GameplayUI.Instance.transform.position = bounds.center + (Vector3)offset;
 
     }
 
-    public void ClearCell(int x, int y)
+
+    #endregion
+
+    #region Delete Animation
+    private IEnumerator DeleteAnimation(List<GameObject> chain)
     {
-        DataGrid[x, y].Item2 = 0;
-        //Destroy(DataGrid[x, y].Item1.gameObject);
-        if (DataGrid[x, y].Item1 != null)
+        foreach (var child in chain)
         {
-            DataGrid[x, y].Item1._isStatic = false;
-            DataGrid[x, y].Item1.AddTorque(new Vector3(0,0, Random.Range(5f,10f)));
-            DataGrid[x, y].Item1.AddForce(new Vector2(Random.Range(-15f, 15f), Random.Range(5f,10f)));
+            if (child == null)
+            {
+                continue;
+            }
+
+            Tween.Scale(child.transform, Vector3.one * 0.1f, 0.05f, Ease.OutExpo).OnComplete(() =>
+            {
+                //UpdateScore(plusScore + (currentStreak * 10));
+                Destroy(child);
+            });
+            yield return new WaitForSeconds(0.05f);
         }
-        DataGrid[x, y].Item1 = null;
     }
+    /// <summary>
+    /// Store all clearable block to ready to delete
+    /// </summary>
+    /// <param name="index"></param>
+    /// <param name="queue"></param>
+    /// <param name="isColumn"></param>
+    void AddToQueue(int index, List<Block> queue, bool isColumn)
+    {
+        if (isColumn)
+        {
+            //for every element in row, delete all of them
+            for (int j = 0; j < Row; j++)
+            {
+                queue.Add(DataGrid[index, j].Item1);
+                DataGrid[index, j].Item2 = 0;
+                //cubeGrid[col, j] = null;
+            }
+        }
+        else
+        {
+            //for every element in row, delete all of them
+            for (int j = 0; j < Col; j++)
+            {
+                queue.Add(DataGrid[j, index].Item1);
+                DataGrid[j, index].Item2 = 0;
+                //cubeGrid[j, row] = null;
+            }
+        }
+    }
+    #endregion
+
+    #region Board control
     public void CheckAddToGrid(Shape shape)
     {
         // check if can be put on position
@@ -193,7 +274,39 @@ public class GridSystem : MonoBehaviour
         ClearHighLight();
         Observer.Instance.TriggerEvent(ObserverConstant.OnPlacingShape);
     }
+    public void ClearCell(int x, int y)
+    {
+        DataGrid[x, y].Item2 = 0;
+        //Destroy(DataGrid[x, y].Item1.gameObject);
+        if (DataGrid[x, y].Item1 != null)
+        {
+            DataGrid[x, y].Item1.gameObject.SetActive(false);
+            // DataGrid[x, y].Item1._isStatic = false;
+            //DataGrid[x, y].Item1.AddTorque(new Vector3(0, 0, Random.Range(5f, 10f)));
+            //DataGrid[x, y].Item1.AddForce(new Vector2(Random.Range(-15f, 15f), Random.Range(5f, 10f)));
+        }
+        DataGrid[x, y].Item1 = null;
+    }
 
+    public IEnumerator ClearBoard()
+    {
+        Observer.Instance.TriggerEvent(ObserverConstant.OnStateChange, GameState.Holdup);
+        GameplayManager.Instance.ShakeCamera(2f, 0.5f, 10f);
+        yield return new WaitForSeconds(GameplayManager._gameplaySpeed * 2f);
+
+        for (int i = 0; i < Col; i++)
+        {
+            for (int j = 0; j < Row; j++)
+            {
+                ClearCell(i, j);
+                yield return new WaitForSeconds(GameplayManager._gameplaySpeed / 10f);
+            }
+        }
+        Observer.Instance.TriggerEvent(ObserverConstant.OnStateChange, GameState.PlayerTurn);
+    }
+    #endregion
+
+    #region Board logic
     /// <summary>
     /// check when block is put in which slot, start checking row and column of it
     /// </summary>
@@ -280,7 +393,7 @@ public class GridSystem : MonoBehaviour
             {
                 for (int j = 0; j < Row; j++)
                 {
-                    ClearCell(i,j);
+                    ClearCell(i, j);
                     totalDamage += GameplayManager.Instance.plusScore + (GameplayManager.Instance.currentStreak * 10);
                 }
 
@@ -305,25 +418,6 @@ public class GridSystem : MonoBehaviour
 
         Observer.Instance.TriggerEvent(ObserverConstant.OnStateChange, GameState.PlayerTurn);
     }
-
-    private IEnumerator DeleteAnimation(List<GameObject> chain)
-    {
-        foreach (var child in chain)
-        {
-            if (child == null)
-            {
-                continue;
-            }
-
-            Tween.Scale(child.transform, Vector3.one * 0.1f, 0.05f, Ease.OutExpo).OnComplete(() =>
-            {
-                //UpdateScore(plusScore + (currentStreak * 10));
-                Destroy(child);
-            });
-            yield return new WaitForSeconds(0.05f);
-        }
-    }
-
     /// <summary>
     /// Check if found any line can be clear
     /// </summary>
@@ -359,36 +453,6 @@ public class GridSystem : MonoBehaviour
             }
 
             return true;
-        }
-    }
-
-    /// <summary>
-    /// Store all clearable block to ready to delete
-    /// </summary>
-    /// <param name="index"></param>
-    /// <param name="queue"></param>
-    /// <param name="isColumn"></param>
-    void AddToQueue(int index, List<Block> queue, bool isColumn)
-    {
-        if (isColumn)
-        {
-            //for every element in row, delete all of them
-            for (int j = 0; j < Row; j++)
-            {
-                queue.Add(DataGrid[index, j].Item1);
-                DataGrid[index, j].Item2 = 0;
-                //cubeGrid[col, j] = null;
-            }
-        }
-        else
-        {
-            //for every element in row, delete all of them
-            for (int j = 0; j < Col; j++)
-            {
-                queue.Add(DataGrid[j, index].Item1);
-                DataGrid[j, index].Item2 = 0;
-                //cubeGrid[j, row] = null;
-            }
         }
     }
 
@@ -509,29 +573,17 @@ public class GridSystem : MonoBehaviour
         // Check if out of move
         if (isOutOfPossibleMove)
         {
+            Debug.Log("OUT OF MOVE");
+
+            GameplayManager.Instance.LoseLife();
+
             StartCoroutine(ClearBoard());
         }
     }
 
-    public IEnumerator ClearBoard()
-    {
-        Observer.Instance.TriggerEvent(ObserverConstant.OnStateChange, GameState.Holdup);
-        Debug.Log("OUT OF MOVE");
-        GameplayManager.Instance.ShakeCamera(2f, 0.5f, 10f);
-        yield return new WaitForSeconds(GameplayManager._gameplaySpeed * 2f);
+    #endregion
 
-        for (int i = 0; i < Col; i++)
-        {
-            for (int j = 0; j < Row; j++)
-            {
-                ClearCell(i,j);
-                yield return new WaitForSeconds(GameplayManager._gameplaySpeed / 10f);
-            }
-        }
 
-        GameplayManager.Instance.LoseLife();
-        Observer.Instance.TriggerEvent(ObserverConstant.OnStateChange, GameState.PlayerTurn);
-    }
 #if UNITY_EDITOR
     private void OnDrawGizmos()
     {

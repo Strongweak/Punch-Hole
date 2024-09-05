@@ -11,7 +11,7 @@ public class GameplayManager : MonoBehaviour
     public static GameplayManager Instance;
     public static float _gameplaySpeed = 0.2f;
     public static WaitForSeconds _delay = new WaitForSeconds(_gameplaySpeed);
-
+    [SerializeField] Shape _shapePrefab;
     #region Player stat
 
     [Header("Player stat")]
@@ -124,8 +124,10 @@ public class GameplayManager : MonoBehaviour
         {
             if (GameplayUI.Instance.worldSpaceTransforms[i].transform.childCount == 0)
             {
-                Shape newShape =
-                    Instantiate(spawnableBlock.spawnableBlock[Random.Range(0, spawnableBlock.spawnableBlock.Count)]);
+                // Shape newShape =
+                //     Instantiate(spawnableBlock.spawnableBlock[Random.Range(0, spawnableBlock.spawnableBlock.Count)]);
+                Shape newShape = Instantiate(_shapePrefab);
+                newShape.FeedData(spawnableBlock.spawnableData[Random.Range(0, spawnableBlock.spawnableData.Count)]);
                 newShape.transform.parent = GameplayUI.Instance.worldSpaceTransforms[i];
                 newShape.transform.localPosition = Vector3.zero;
                 newShape.SetupVisual();
@@ -240,6 +242,10 @@ public class GameplayManager : MonoBehaviour
         {
             var block = currentBlock[i];
             currentBlock.RemoveAt(i);
+            //release the block back to the pool
+            foreach(Block item in block._childBlock){
+                ObjectPool.instance.ReturnToPool(item.gameObject);
+            }
             Destroy(block.gameObject);
         }
 

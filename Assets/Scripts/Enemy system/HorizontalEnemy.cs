@@ -75,6 +75,10 @@ public class HorizontalEnemy : Enemy
         Telegraph();
     }
 
+    protected override void Setup()
+    {
+        Telegraph();
+    }
     protected override void Telegraph()
     {
         List<int> numbers = new List<int>();

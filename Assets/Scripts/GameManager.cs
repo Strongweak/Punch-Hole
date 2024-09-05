@@ -94,25 +94,25 @@ public class GameManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        if (MainMenuDataTransfer.Instance == null)
-        {
-            spawnableBlock = normalPack.spawnableBlock;
-        }
-        else
-        {
-            switch (MainMenuDataTransfer.Instance.difficulty)
-            {
-                case 0:
-                    spawnableBlock = ezPack.spawnableBlock;
-                    break;
-                case 1:
-                    spawnableBlock = normalPack.spawnableBlock;
-                    break;
-                case 2:
-                    spawnableBlock = hardPack.spawnableBlock;
-                    break;
-            }
-        }
+        // if (MainMenuDataTransfer.Instance == null)
+        // {
+        //     spawnableBlock = normalPack.spawnableBlock;
+        // }
+        // else
+        // {
+        //     switch (MainMenuDataTransfer.Instance.difficulty)
+        //     {
+        //         case 0:
+        //             spawnableBlock = ezPack.spawnableBlock;
+        //             break;
+        //         case 1:
+        //             spawnableBlock = normalPack.spawnableBlock;
+        //             break;
+        //         case 2:
+        //             spawnableBlock = hardPack.spawnableBlock;
+        //             break;
+        //     }
+        // }
         scoreText.text = "000000000";
         ispause = false;
         SpawnNewBlocks();

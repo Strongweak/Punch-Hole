@@ -23,8 +23,6 @@ public class Enemy : MonoBehaviour, IDamageable
     [Header("Respond")] 
     [SerializeField] private Image healthbarShader;
     [SerializeField] protected EnemyVisual enemyVisual;
-    [SerializeField] private GameObject informationBox;
-    [SerializeField] private TextMeshProUGUI descriptionTex;
     [SerializeField] private TextMeshProUGUI numberText;
 
     public Sequence currentSequence = new Sequence();
@@ -40,9 +38,8 @@ public class Enemy : MonoBehaviour, IDamageable
         _currentHealth = maxHealth;
         _currentMoveCount = _delayAfterMove;
         numberText.text = _currentMoveCount.ToString();
-        descriptionTex.text = enemyData.description;
         healthbarShader.material.SetFloat("_Percentage", _currentHealth/ maxHealth);
-        Telegraph();
+        Setup();
     }
     
     //warning the player
@@ -50,6 +47,10 @@ public class Enemy : MonoBehaviour, IDamageable
     protected virtual void Telegraph()
     {
         
+    }
+
+    protected virtual void Setup(){
+
     }
     // how the enemy gonna behave
     public virtual IEnumerator EffectEvent()

@@ -5,5 +5,5 @@ using UnityEngine;
 [CreateAssetMenu (menuName = "Shape pack")]
 public class ShapeListSO : ScriptableObject
 {
-    public List<Shape> spawnableBlock;
+    public List<ShapeData> spawnableData;
 }

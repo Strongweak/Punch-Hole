@@ -57,14 +57,16 @@ MonoBehaviour:
   _currentHealth: 0
   _currentMoveCount: 0
   _isDead: 0
-  healthbarShader: {fileID: 0}
+  healthbarShader: {fileID: 182556286523163647}
   enemyVisual: {fileID: 0}
   informationBox: {fileID: 0}
   descriptionTex: {fileID: 0}
-  numberText: {fileID: 0}
-  startCol: 0
-  startRow: 0
+  numberText: {fileID: 6254156051712948948}
+  _currentCol: 0
+  _currentRow: 0
   moveStep: 0
+  _telegraphMat: {fileID: 2100000, guid: 25d99fc58d0bf6146bea3306619d9a01, type: 2}
+  _mothMat: {fileID: -876546973899608171, guid: 1e8948ceeb0e00549a17929b2cb03563, type: 3}
 --- !u!1 &2253972977264282361
 GameObject:
   m_ObjectHideFlags: 0

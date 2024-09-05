@@ -12,6 +12,7 @@ public class Block : MonoBehaviour
     private Material _mat;
     private MaterialPropertyBlock _materialPropertyBlock;
     
+    
     [Header("Custom physic")]
     [Header("Physic")]
     [SerializeField] private float _gravity;

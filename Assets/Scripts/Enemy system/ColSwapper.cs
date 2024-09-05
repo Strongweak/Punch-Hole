@@ -15,13 +15,17 @@ public class ColSwapper : Enemy
 
     protected override void Start()
     {
-        CreateWarningMesh();
         base.Start();
     }
-    
+    protected override void Setup()
+    {
+        CreateWarningMesh();
+
+        Telegraph();
+    }
     public override IEnumerator EffectEvent()
     {
-        Tween.ShakeLocalPosition(enemyVisual.transform,Vector3.up* 100f,GameplayManager._gameplaySpeed,1f, true, Ease.OutElastic);
+        Tween.ShakeLocalPosition(enemyVisual.transform, Vector3.up * 100f, GameplayManager._gameplaySpeed, 1f, true, Ease.OutElastic);
         Observer.Instance.TriggerEvent(ObserverConstant.OnStateChange, GameState.EnemyTurn);
         Sequence shithead = Sequence.Create(cycles: 1, CycleMode.Yoyo);
         for (int i = 0; i < GridSystem.Row; i++)
@@ -45,7 +49,7 @@ public class ColSwapper : Enemy
                     .ChainDelay(GameplayManager._gameplaySpeed);
                 //GridSystem.dataGrid[firstCol, i].Item1.transform.position = new Vector3(secCol, i);
             }
-            
+
             if (GridSystem.DataGrid[secCol, i].Item1 != null)
             {
                 secondTween = Tween.Scale(GridSystem.DataGrid[secCol, i].Item1.transform, Vector3.one * 1.2f, GameplayManager._gameplaySpeed)
@@ -81,8 +85,8 @@ public class ColSwapper : Enemy
         firstCol = numbers[Random.Range(0, numbers.Count)];
         numbers.Remove(firstCol);
         secCol = numbers[Random.Range(0, numbers.Count)];
-        _firstWarning.transform.position = new Vector3(firstCol,GridSystem.Row/2);
-        _secondWarning.transform.position = new Vector3(secCol,GridSystem.Row/2);
+        _firstWarning.transform.position = new Vector3(firstCol, GridSystem.Row / 2);
+        _secondWarning.transform.position = new Vector3(secCol, GridSystem.Row / 2);
     }
 
     private void CreateWarningMesh()
@@ -91,19 +95,19 @@ public class ColSwapper : Enemy
         Destroy(_secondWarning);
         Vector3[] verts = new Vector3[4];
         Vector2[] uv = new Vector2[4];
-        int[] triangle = new int[6]; 
-    
+        int[] triangle = new int[6];
+
         //index of the vertices
-        verts[0] = new Vector3(0-0.5f,1-0.5f);
-        verts[1] = new Vector3(1-0.5f,1-0.5f);
-        verts[2] = new Vector3(0-0.5f,0-0.5f);
-        verts[3] = new Vector3(1-0.5f,0-0.5f);
-        
+        verts[0] = new Vector3(0 - 0.5f, 1 - 0.5f);
+        verts[1] = new Vector3(1 - 0.5f, 1 - 0.5f);
+        verts[2] = new Vector3(0 - 0.5f, 0 - 0.5f);
+        verts[3] = new Vector3(1 - 0.5f, 0 - 0.5f);
+
         //create a new uv
-        uv[0] = new Vector2(0-0.5f,1-0.5f);
-        uv[1] = new Vector2(1-0.5f,1-0.5f);
-        uv[2] = new Vector2(0-0.5f,0-0.5f);
-        uv[3] = new Vector2(1-0.5f,0-0.5f);
+        uv[0] = new Vector2(0 - 0.5f, 1 - 0.5f);
+        uv[1] = new Vector2(1 - 0.5f, 1 - 0.5f);
+        uv[2] = new Vector2(0 - 0.5f, 0 - 0.5f);
+        uv[3] = new Vector2(1 - 0.5f, 0 - 0.5f);
 
         //mandatory:
         //corner MUST be clockwise order
@@ -119,32 +123,32 @@ public class ColSwapper : Enemy
         mesh.vertices = verts;
         mesh.uv = uv;
         mesh.triangles = triangle;
-        _firstWarning = new GameObject("Warning1",typeof(MeshFilter), typeof(MeshRenderer));
+        _firstWarning = new GameObject("Warning1", typeof(MeshFilter), typeof(MeshRenderer));
         _firstWarning.transform.localScale = new Vector3(1, GridSystem.Row);
         _firstWarning.GetComponent<MeshFilter>().mesh = mesh;
         _firstWarning.GetComponent<MeshRenderer>().material = warningMaterial;
-        
-        _secondWarning = new GameObject("Warning2",typeof(MeshFilter), typeof(MeshRenderer));
+
+        _secondWarning = new GameObject("Warning2", typeof(MeshFilter), typeof(MeshRenderer));
         _secondWarning.transform.localScale = new Vector3(1, GridSystem.Row);
         _secondWarning.GetComponent<MeshFilter>().mesh = mesh;
         _secondWarning.GetComponent<MeshRenderer>().material = warningMaterial;
-        
+
         _matBlock = new MaterialPropertyBlock();
         _matBlock.SetInt("_Highlight", 0);
         _firstWarning.GetComponent<MeshRenderer>().SetPropertyBlock(_matBlock);
         _secondWarning.GetComponent<MeshRenderer>().SetPropertyBlock(_matBlock);
     }
-    
+
     public override void HeadupTelegraph()
     {
-        _matBlock.SetInt("_Highlight",1);
+        _matBlock.SetInt("_Highlight", 1);
         _secondWarning.GetComponent<MeshRenderer>().SetPropertyBlock(_matBlock);
         _firstWarning.GetComponent<MeshRenderer>().SetPropertyBlock(_matBlock);
 
-    }    
+    }
     public override void ReleaseHeadupTelegraph()
     {
-        _matBlock.SetInt("_Highlight",0);
+        _matBlock.SetInt("_Highlight", 0);
         _secondWarning.GetComponent<MeshRenderer>().SetPropertyBlock(_matBlock);
         _firstWarning.GetComponent<MeshRenderer>().SetPropertyBlock(_matBlock);
     }

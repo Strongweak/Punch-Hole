@@ -55,6 +55,9 @@ public class ObjectPool : MonoBehaviour
 		return null;
 	}
 
+	public void ReturnToPool(GameObject poolObject){
+		poolObject.transform.parent = transform;
+	}
 	GameObject CreateObject(GameObject item)
 	{
 		GameObject obj = Instantiate(item, transform);
