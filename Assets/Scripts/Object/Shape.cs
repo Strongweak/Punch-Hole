@@ -53,6 +53,7 @@ public class Shape : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IDra
                 boardArray[i, j] = Convert.ToInt32(_data.board[i].col[j]);
             }
         }
+        SetupVisual();
     }
     public void SetupVisual()
     {

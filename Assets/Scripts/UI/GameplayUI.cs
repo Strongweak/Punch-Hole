@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using PrimeTween;
 using TMPro;
 using UnityEngine;
@@ -59,7 +60,7 @@ public class GameplayUI : MonoBehaviour
         parent.SetChildVisual(newVisual);
         newVisual.SetupParent(parent);
     }
-    public IEnumerator SetupWorldPosition()
+    public async Task SetupWorldPosition()
     {
         displayTransforms = new List<Transform>();
         worldSpaceTransforms = new List<Transform>();
@@ -72,7 +73,8 @@ public class GameplayUI : MonoBehaviour
             newWorldSpace.name = "slot";
             worldSpaceTransforms.Add(newWorldSpace.transform);
         }
-        yield return new WaitForEndOfFrame();
+        await Task.Yield();
+        //yield return new WaitForEndOfFrame();
         for (int i = 0; i < GameplayManager.Instance.maxVisibleShape; i++)
         {
             Vector3 worldPos;

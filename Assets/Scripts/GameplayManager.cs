@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using PrimeTween;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -61,10 +62,11 @@ public class GameplayManager : MonoBehaviour
         Instance = this;
     }
 
-    public void StartGame(){
+    public async void StartGame(){
         currentBlock = new List<Shape>();
         _currentlife = _maxLife;
-        StartCoroutine(SetupGameplay());
+        await SetupGameplay();
+        //StartCoroutine(SetupGameplay());
         Observer.Instance.AddObserver(ObserverConstant.OnPlacingShape, o =>
         {
             StartCoroutine(GameplayFlow());
@@ -263,16 +265,18 @@ public class GameplayManager : MonoBehaviour
             GameplayUI.Instance.UpdateLife(_currentlife);
         }
     }
-    private IEnumerator SetupGameplay()
+    private async Task SetupGameplay()
     {
         _currentlife = 3;
         _currentScore = 0;
         GameplayUI.Instance.UpdateLife(_currentlife);
         GameplayUI.Instance.UpdateScore(_currentScore);
         //Generate grid
-        yield return StartCoroutine(GridSystem.Instance.GenerateGrid());
+        await GridSystem.Instance.GenerateGrid();
+        //yield return StartCoroutine(GridSystem.Instance.GenerateGrid());
         //create world position of ui for the block to spawn
-        yield return StartCoroutine(GameplayUI.Instance.SetupWorldPosition());
+        await GameplayUI.Instance.SetupWorldPosition();
+        //yield return StartCoroutine(GameplayUI.Instance.SetupWorldPosition());
         //now we spawn the block
         StartCoroutine(SpawnNewBlocks());
     }

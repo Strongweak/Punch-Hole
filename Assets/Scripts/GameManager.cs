@@ -29,7 +29,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private ShapeListSO ezPack;
     [SerializeField] private ShapeListSO normalPack;
     [SerializeField] private ShapeListSO hardPack;
-    [SerializeField] private List<Shape> spawnableBlock;
+    [SerializeField] private Shape spawnableBlock;
     [SerializeField] private List<Sprite> randomSprite;
     [SerializeField] private List<Transform> blockPosition;
     [SerializeField] private List<Shape> currentBlock;
@@ -429,7 +429,8 @@ public class GameManager : MonoBehaviour
         for (int i = 0; i < 3; i++)
         {
             Sprite visual = randomSprite[Random.Range(0, randomSprite.Count)];
-            Shape newShape = Instantiate(spawnableBlock[Random.Range(0, spawnableBlock.Count)]);
+            Shape newShape = Instantiate(spawnableBlock);
+            newShape.FeedData(ezPack.spawnableData[Random.Range(0, ezPack.spawnableData.Count)]);
             newShape.transform.parent = blockPosition[i];
             newShape.transform.localPosition = Vector3.zero;
             for (int j = 0; j < newShape._childBlock.Count; j++)

@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using PrimeTween;
 #if UNITY_EDITOR
 using UnityEditor;
@@ -36,7 +37,7 @@ public class GridSystem : MonoBehaviour
     }
 
     #region Grid Maker
-    public IEnumerator GenerateGrid()
+    public async Task GenerateGrid()
     {
         if (_gridContainer != null)
         {
@@ -86,7 +87,9 @@ public class GridSystem : MonoBehaviour
             }
         }
 
-        yield return new WaitForEndOfFrame();
+        await Task.Yield();
+        await Task.Delay(100);
+        //yield return new WaitForEndOfFrame();
         //Adjust camera to fit the board
         var bounds = new Bounds();
         foreach (var col in Visualgrid)
@@ -104,7 +107,8 @@ public class GridSystem : MonoBehaviour
         .Group(Tween.CameraOrthographicSize(cam, cam.orthographicSize, Mathf.Max(horizontal, vertical) * 0.5f, GameplayManager._gameplaySpeed));
         //cam.orthographicSize = Mathf.Max(horizontal, vertical) * 0.5f;
         //cam.transform.position = bounds.center + new Vector3(0, 0, -10) + (Vector3)offset;
-        yield return zoom.ToYieldInstruction();
+        //yield return zoom.ToYieldInstruction();
+        await zoom;
         GameplayUI.Instance._mainCanvas.GetComponent<Canvas>().renderMode = RenderMode.WorldSpace;
         //GameplayUI.Instance.transform.position = bounds.center + (Vector3)offset;
 
